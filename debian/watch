@@ -1,0 +1,4 @@
+version=3
+
+opts=uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha)\d*)$/$1~$2/,dversionmangle=s/\.real\d*$// \
+  https://github.com/ClusterLabs/libqb/releases .*/libqb-([\d.]+)\.tar\.xz

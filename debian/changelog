@@ -1,0 +1,293 @@
+libqb (1.0-1~bpo8+1) jessie-backports; urgency=medium
+
+  [ Christoph Berg ]
+  * [2db785b] Remove madkiss from uploaders
+
+  [ Ferenc Wágner ]
+  * Rebuild for jessie-backports.
+  * [2d6c7e6] Revert "Migrate to automatic debug packages"
+
+ -- Ferenc Wágner <wferi@niif.hu>  Sun, 31 Jul 2016 15:12:49 +0200
+
+libqb (1.0-1) unstable; urgency=medium
+
+  [ Arturo Borrero Gonzalez ]
+  * [7388fde] d/tests/control: add build-essential to ipc test
+  * [40f4beb] d/control: get rid of XS-Testsuite
+  * [95caa73] d/control: bump standar version to 3.9.8
+  * [c0a26fd] d/: wrap-and-sort
+
+  [ Ferenc Wágner ]
+  * [8560795] debian/watch: latest releases are present on GitHub only
+  * [fe35562] Configure git-buildpackage via debian/gbp.conf
+  * [780dd4e] New upstream version (1.0)
+  * [70f033c] Delete upstreamed patches, refresh the rest
+  * [8c1f8c6] Promote to Priority: optional
+  * [7f823ce] Migrate to automatic debug packages
+  * [fddab53] Update symbols files for powerpcspe (Closes: #824923)
+  * [5018dd5] Use HTTPS for Vcs-Browser
+  * [81e8617] New patch docs-qbdefs.h-description-must-directly-follow-
+    file.patch
+  * [31a0802] New patch low-fixed-Spelling-error-of-failure-in-qbhdb.h.patch.
+    Thanks to "bin.liu"
+  * [b65ba93] New symbol: qb_log_ctl2 introduced by 642f74d
+  * [2ee657a] With plain dh_autoreconf the autotools_dev addon is not needed
+  * [c4fb5d5] Graphviz is needed for the HTML documentation only
+  * [2b912a6] Don't build the software if only the documentation is needed
+  * [2f70688] Move API documentation into /usr/share/doc/libqb-dev
+  * [4c1f142] Don't build and ship the static library
+  * [ec5ac40] Ship README.markdown in each binary package
+  * [7a695ca] Only dh_install uses --fail-missing
+  * [240c781] Use dh_autoreconf --as-needed
+  * [0f1c621] Back out of symlinking the documentation directories
+  * [c37ccb3] .version is distributed by upstream already
+  * [48544c6] Avoid useless dependencies in the utilities
+  * [d2183c4] Enable parallel builds
+  * [3895c50] Repository layout changed to the DEP-14 recommendation
+
+ -- Ferenc Wágner <wferi@niif.hu>  Wed, 22 Jun 2016 09:48:05 +0200
+
+libqb (0.17.2.real-6) unstable; urgency=medium
+
+  * Update hurd support patch to fix regression in sem_timedwait detection.
+
+ -- Christoph Berg <myon@debian.org>  Mon, 22 Feb 2016 20:51:37 +0100
+
+libqb (0.17.2.real-5) unstable; urgency=medium
+
+  * Support hurd-i386, patch by Svante Signell, thanks!
+    Closes: #803777.
+  * Merge all symbols files into one using (arch) tags.
+
+ -- Christoph Berg <myon@debian.org>  Fri, 19 Feb 2016 11:19:26 +0100
+
+libqb (0.17.2.real-4~bpo8+1) jessie-backports; urgency=medium
+
+  * Rebuild for jessie-backports.
+
+ -- Christoph Berg <myon@debian.org>  Tue, 16 Feb 2016 10:31:06 +0100
+
+libqb (0.17.2.real-4) unstable; urgency=medium
+
+  * Add debian/libqb0.symbols.ppc64 symlink.
+  * Testsuite is stable now.  Closes: #754692.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 30 Sep 2015 11:49:14 +0200
+
+libqb (0.17.2.real-3) unstable; urgency=medium
+
+  * Add two more patches from upstream to fix ipc test.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Fri, 25 Sep 2015 15:13:06 +0200
+
+libqb (0.17.2.real-2) unstable; urgency=medium
+
+  * Use dh --with autotools_dev again.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 23 Sep 2015 10:41:59 +0200
+
+libqb (0.17.2.real-1) unstable; urgency=medium
+
+  * Import new Upstream release tarball for version 0.17.2.
+  * Bump version to 0.17.2.real-1.
+  * Update watch file to track the proper release tarballs. Also add
+    dversionmangle to find upstream tarballs for "real" versions.
+
+ -- Adrian Vondendriesch <adrian.vondendriesch@credativ.de>  Tue, 22 Sep 2015 10:30:16 +0200
+
+libqb (0.17.2-1) unstable; urgency=medium
+
+  [ Christoph Berg ]
+  * New upstream version, including all our patches!
+
+  [ Adrian Vondendriesch ]
+  * Create 0001-Fix-check_ipc-tests-so-they-exit-correctly.patch to fix
+    ipc.test.
+
+ -- Christoph Berg <myon@debian.org>  Sun, 20 Sep 2015 19:51:59 +0200
+
+libqb (0.17.1-6) experimental; urgency=medium
+
+  * Bump symbol versions for qb_ipc_type, qb_log_conf, and qb_log_filter_type.
+    Patch by Ferenc Wágner, thanks!  Closes: #794566
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Tue, 04 Aug 2015 16:11:06 +0200
+
+libqb (0.17.1-5) unstable; urgency=medium
+
+  [ Adrian Vondendriesch ]
+  * Add psmisc to autopkgtest dependencies.
+  * Add myself to Uploaders.
+
+ -- Christoph Berg <myon@debian.org>  Mon, 27 Jul 2015 15:07:18 +0200
+
+libqb (0.17.1-4) unstable; urgency=medium
+
+  * Add architecture-specific symbols files for kfreebsd-*; epoll is replaced
+    by kqueue there.
+  * Fix dir->symlink transition for /usr/share/doc/libqb-dev. Thanks to
+    Andreas Beckmann for spotting and the fixing instructions!
+    Closes: #788167
+
+ -- Christoph Berg <myon@debian.org>  Tue, 09 Jun 2015 22:49:05 +0200
+
+libqb (0.17.1-3) unstable; urgency=medium
+
+  * Re-disable __attribute__((section())) on powerpc and ppc64el. Instead,
+    ship architecture-specific symbols files that skip the __start___verbose
+    and __stop___verbose symbols.
+
+ -- Christoph Berg <myon@debian.org>  Fri, 15 May 2015 20:44:27 +0200
+
+libqb (0.17.1-2) unstable; urgency=medium
+
+  * Enable __attribute__((section())) on powerpc, it was hardcoded
+    "no" in configure.ac.
+  * Ignore testsuite results on kfreebsd-* for now.
+
+ -- Christoph Berg <myon@debian.org>  Fri, 15 May 2015 18:56:48 +0200
+
+libqb (0.17.1-1) unstable; urgency=medium
+
+  [ Richard B Winters ]
+  * New upstream release
+  * debian/patches: Dropped all 0.17.0 patches as they are not needed in new 
+    release
+  * debian/patches: Added patch for creating .tarball-version prior to build
+  * debian/patches: Added patch for creating ChangeLog prior to build
+    - All patches run through GBP PQ; resulting in serialized file names, the
+      patch files were not given serialized names previously
+  * debian/rules: Updated hardening implementation for debhelper 9
+  * debian/rules: Updated to remove *.la files as they are not needed in this
+    package
+  * debian/rules: Updated to override dh_auto_configure, and set the docdir as
+    well as to enable dependency tracking option
+  * debian/rules: Updated to remove COPYING from debian/tmp after auto_install,
+    which resolves a lintian notice due to mutliple copies of license
+  * debian/rules: Updated to provide method for creating a debug package
+  * debian/rules: Fixed spacing between overrides so everything matches
+  * debian/control: Added myself as an uploader
+  * debian/control: Added libqb0-dbg to the package offering
+  * debian/control: Dropped hardening-wrapper, using hardening via debhelper
+    9; (see https://wiki.debian.org/Hardening)
+  * debian/control: Added glib2.0-dev to build-depends in order to make glib
+    tests available in this package
+  * debian/control: Bump Standards-Version
+      - No changes required
+  * debian/control: Updated Homepage
+  * debian/control: Added Vcs-Git and Vcs-Browser
+  * debian/control: Fixed formatting for enabling folding
+  * debian/compat: Bump to level 9
+  * debian/libqb0.symbols: Added for better cross-dist-version support
+  * debian/watch: Added watch for github releases
+  * debian/copyright: Fixed unversioned format uri
+  * debian/copyright: Added myself and Anibal to debian/* copyright
+  * debian/copyright: Updated date range for Debian-Ha Maintainers' and
+    Martin's entry
+  * debian/README.source: Added to provide information for those building
+    from source
+  * debian/.gitignore: Added to prevent debian files from being ignored due
+    to the .gitignore file's directives in the parent directory
+
+  [ Ferenc Wágner ]
+  * Streamline debian/rules
+  * Do not suppress echoing of doxygen commands
+  * Build and package HTML documentation
+  * Remove obsolete Doxygen options
+  * Clear Doxygen DOT_FONTNAME (FreeSans is not included anymore)
+  * Fix spelling in comments: incomming, neccessary
+  * Fix manpage whatis entries
+  * Remove questionnable localstatedir override
+  * Add an automatically substituted Pre-Depends to ease backporting
+  * Move HTML documentation into the libqb-dev package
+
+  [ Christoph Berg ]
+  * Import accurate symbols information from snapshot.debian.org.
+  * Fix alignment issues on hppa, patch by Helge Deller, thanks!
+    Closes: #760199
+  * Enable verbose testsuite operation, see #754692.
+  * qb-blackbox is actually installed. Closes: #755711.
+  * Fix descriptions. Closes: #732777.
+  * Add autopkgtest using examples/ipcclient+server.
+  * Multi-arch the binaries.
+  * Add myself to Uploaders.
+
+ -- Christoph Berg <christoph.berg@credativ.de>  Wed, 06 May 2015 14:28:46 +0200
+
+libqb (0.17.0-2) unstable; urgency=medium
+
+  * debian/patches/buildfix-dvossel-1.patch: Add an additional fix by dvossel
+    to ensure proper building of libqb
+
+ -- Martin Loschwitz <madkiss@debian.org>  Wed, 05 Mar 2014 14:44:10 +0000
+
+libqb (0.17.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/patches/fix_version_number.patch: Drop as its unnecessary now
+  * debian/patches/test_ring_buffer1.diff: Drop as this is included upstream
+  * debian/patches/buildfix-dvossel-1.patch: Avoid test-suite failure
+  * debian/control: Bump Standards-Version
+
+ -- Martin Loschwitz <madkiss@debian.org>  Fri, 21 Feb 2014 09:59:52 +0000
+
+libqb (0.16.0.real-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Do not overwrite memory during reading
+    Add test_ring_buffer1.diff
+    Patch by Dejan Latinovic
+    Closes: #731967
+  * Pass --localstatedir=`pwd`/var to configure to not fail the
+    tests when it's built with pbuilder
+
+ -- Anibal Monsalve Salazar <anibal@debian.org>  Thu, 20 Feb 2014 07:21:30 +0000
+
+libqb (0.16.0.real-1) unstable; urgency=low
+
+  * New upload, this time with the "right" upstream .orig.tar.gz
+
+ -- Martin Loschwitz <madkiss@debian.org>  Fri, 02 Aug 2013 05:38:44 +0000
+
+libqb (0.16.0-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Martin Loschwitz <madkiss@debian.org>  Thu, 01 Aug 2013 10:57:28 +0000
+
+libqb (0.14.4-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Martin Loschwitz <madkiss@debian.org>  Wed, 20 Mar 2013 22:55:49 +0000
+
+libqb (0.14.3-2) unstable; urgency=low
+
+  * debian/control: Added "check" and "pkg-config" to Build-Depends.
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 13 Nov 2012 09:46:24 +0000
+
+libqb (0.14.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 13 Nov 2012 09:38:41 +0000
+
+libqb (0.14.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 09 Oct 2012 08:45:53 +0000
+
+libqb (0.11.1-2) unstable; urgency=low
+
+  * Added doxygen to Build-Depends to make sure documentation is
+    built properly 
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 03 Apr 2012 06:47:36 +0000
+
+libqb (0.11.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #666504)  
+
+ -- Martin Loschwitz <madkiss@debian.org>  Sun, 01 Apr 2012 16:47:49 +0000

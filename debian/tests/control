@@ -1,0 +1,3 @@
+Depends: @, psmisc, build-essential
+Tests: ipc
+Restrictions: allow-stderr build-needed

@@ -1,0 +1,21 @@
+libqb for Debian
+----------------
+
+* This package now supports the glib-based tests, and as a result it also
+  makes use of libpthread librt and libdl. Do not trust the warnings that
+  are displayed in a source build suggesting that it causes a useless dep,  
+  See configure.ac in the source for more information.
+
+* .tarball-version needs to be created in each new package version, and
+  its contents - a version string - need to be bumped to the package's
+  version. See build-aux/git-version-gen for more information regarding
+  what this file does. It's required to populate .version in the absence of
+  a .git directory, which in turn populates the version string in libqb0.pc,
+  and - in turn - will effect the outcome of pkg-config --modversion libqb0 
+  (i.e. it will fail) if it is not set correctly. 
+
+  It can be updated by modifying the add-tarball-version-file patch. The
+  issue has been reported upstream; so if upstream begins providing said file
+  we can drop the patch.
+
+ -- Richard B Winters <rik@mmogp.com>  Sun, 29 Mar 2015 21:39:16 -0400

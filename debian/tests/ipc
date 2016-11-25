@@ -1,0 +1,15 @@
+#!/bin/sh
+
+trap "rm -f ipc.out" 0 2 3 15
+rm -f ipc.out
+killall ipcserver lt-ipcserver || :
+
+set -eux
+
+examples/ipcserver > ipc.out 2>&1 &
+sleep 1
+( echo this-is-a-test; echo q ) | examples/ipcclient
+killall ipcserver lt-ipcserver || :
+
+cat ipc.out
+grep this-is-a-test ipc.out

@@ -1,0 +1,24 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@niif.hu>
+Date: Sat, 18 Jun 2016 22:59:53 +0200
+Subject: docs: qbdefs.h: description must directly follow @file
+
+---
+ include/qb/qbdefs.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/qb/qbdefs.h b/include/qb/qbdefs.h
+index 21d3627..f1e80f5 100644
+--- a/include/qb/qbdefs.h
++++ b/include/qb/qbdefs.h
+@@ -28,9 +28,9 @@ extern "C" {
+ 
+ /**
+  * @file qbdefs.h
+- * @author Angus Salkeld <asalkeld@redhat.com>
+- *
+  * These are some convience macros and defines.
++ *
++ * @author Angus Salkeld <asalkeld@redhat.com>
+  */
+ 
+ /*
