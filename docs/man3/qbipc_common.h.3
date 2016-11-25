@@ -1,0 +1,109 @@
+.TH "qbipc_common.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbipc_common.h \- 
+.PP
+common types and definitions  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBqb_ipc_request_header\fP"
+.br
+.ti -1c
+.RI "struct \fBqb_ipc_response_header\fP"
+.br
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBQB_IPC_MSG_NEW_MESSAGE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBQB_IPC_MSG_USER_START\fP   \fBQB_IPC_MSG_NEW_MESSAGE\fP"
+.br
+.ti -1c
+.RI "#define \fBQB_IPC_MSG_AUTHENTICATE\fP   -1"
+.br
+.ti -1c
+.RI "#define \fBQB_IPC_MSG_NEW_EVENT_SOCK\fP   -2"
+.br
+.ti -1c
+.RI "#define \fBQB_IPC_MSG_DISCONNECT\fP   -3"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBqb_ipc_type\fP { \fBQB_IPC_SOCKET\fP, \fBQB_IPC_SHM\fP, \fBQB_IPC_POSIX_MQ\fP, \fBQB_IPC_SYSV_MQ\fP, \fBQB_IPC_NATIVE\fP }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "struct \fBqb_ipc_request_header\fP \fB__attribute__\fP ((aligned(8)))"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "enum \fBqb_ipc_type\fP \fB__attribute__\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+common types and definitions 
+
+
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define QB_IPC_MSG_AUTHENTICATE   -1"
+
+.SS "#define QB_IPC_MSG_DISCONNECT   -3"
+
+.SS "#define QB_IPC_MSG_NEW_EVENT_SOCK   -2"
+
+.SS "#define QB_IPC_MSG_NEW_MESSAGE   0"
+
+.SS "#define QB_IPC_MSG_USER_START   \fBQB_IPC_MSG_NEW_MESSAGE\fP"
+
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBqb_ipc_type\fP"
+
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fIQB_IPC_SOCKET \fP\fP
+.TP
+\fB\fIQB_IPC_SHM \fP\fP
+.TP
+\fB\fIQB_IPC_POSIX_MQ \fP\fP
+.TP
+\fB\fIQB_IPC_SYSV_MQ \fP\fP
+.TP
+\fB\fIQB_IPC_NATIVE \fP\fP
+.SH "Function Documentation"
+.PP 
+.SS "struct \fBqb_ipc_request_header\fP __attribute__ ((aligned(8)))"
+
+.SH "Variable Documentation"
+.PP 
+.SS "int32_t error __attribute__"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

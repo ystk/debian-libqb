@@ -1,0 +1,506 @@
+.TH "qblist.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qblist.h \- 
+.PP
+This is a kernel style list implementation\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <qb/qbdefs\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBqb_list_head\fP"
+.br
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBQB_LIST_DECLARE\fP(name)   struct \fBqb_list_head\fP name = { &(name), &(name) }"
+.br
+.RI "\fIDeclare and initialize a list head\&. \fP"
+.ti -1c
+.RI "#define \fBQB_INIT_LIST_HEAD\fP(ptr)"
+.br
+.ti -1c
+.RI "#define \fBqb_list_entry\fP(ptr, type, member)   ((type *)((char *)(ptr)-(char*)(&((type *)0)->member)))"
+.br
+.RI "\fIGet the struct for this entry\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_first_entry\fP(ptr, type, member)   \fBqb_list_entry\fP((ptr)->next, type, member)"
+.br
+.RI "\fIGet the first element from a list\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each\fP(pos, head)   for (pos = (head)->next; pos != (head); pos = pos->next)"
+.br
+.RI "\fIIterate over a list\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_reverse\fP(pos, head)   for (pos = (head)->prev; pos != (head); pos = pos->prev)"
+.br
+.RI "\fIIterate over a list backwards\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_safe\fP(pos, n, head)"
+.br
+.RI "\fIIterate over a list safe against removal of list entry\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_entry\fP(pos, head, member)"
+.br
+.RI "\fIIterate over list of given type\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_entry_reverse\fP(pos, head, member)"
+.br
+.RI "\fIIterate backwards over list of given type\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_entry_safe\fP(pos, n, head, member)"
+.br
+.RI "\fIIterate over list of given type safe against removal of list entry\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_entry_safe_reverse\fP(pos, n, head, member)"
+.br
+.RI "\fIIterate backwards over list safe against removal\&. \fP"
+.ti -1c
+.RI "#define \fBqb_list_for_each_entry_from\fP(pos, head, member)"
+.br
+.RI "\fIIterate over list of given type from the current point\&. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "static void \fBqb_list_init\fP (struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fIInitialize the list entry\&. \fP"
+.ti -1c
+.RI "static void \fBqb_list_add\fP (struct \fBqb_list_head\fP *element, struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fIAdd this element to the list\&. \fP"
+.ti -1c
+.RI "static void \fBqb_list_add_tail\fP (struct \fBqb_list_head\fP *element, struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fIAdd to the list (but at the end of the list)\&. \fP"
+.ti -1c
+.RI "static void \fBqb_list_del\fP (struct \fBqb_list_head\fP *_remove)"
+.br
+.RI "\fIDelete an entry from the list\&. \fP"
+.ti -1c
+.RI "static void \fBqb_list_replace\fP (struct \fBqb_list_head\fP *old, struct \fBqb_list_head\fP *new)"
+.br
+.RI "\fIReplace old entry by new one\&. \fP"
+.ti -1c
+.RI "static int \fBqb_list_is_last\fP (const struct \fBqb_list_head\fP *list, const struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fITests whether list is the last entry in list head\&. \fP"
+.ti -1c
+.RI "static int32_t \fBqb_list_empty\fP (const struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fIA quick test to see if the list is empty (pointing to it's self)\&. \fP"
+.ti -1c
+.RI "static void \fBqb_list_splice\fP (struct \fBqb_list_head\fP *list, struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fIJoin two lists\&. \fP"
+.ti -1c
+.RI "static void \fBqb_list_splice_tail\fP (struct \fBqb_list_head\fP *list, struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fIJoin two lists, each list being a queue\&. \fP"
+.ti -1c
+.RI "static int32_t \fBqb_list_length\fP (struct \fBqb_list_head\fP *head)"
+.br
+.RI "\fICount the number of items in the list\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This is a kernel style list implementation\&. 
+
+
+.PP
+\fBAuthor:\fP
+.RS 4
+Steven Dake sdake@redhat.com 
+.RE
+.PP
+
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define QB_INIT_LIST_HEAD(ptr)"
+\fBValue:\fP
+.PP
+.nf
+do { \
+        (ptr)->next = (ptr); (ptr)->prev = (ptr); \
+} while (0)
+.fi
+.SS "#define QB_LIST_DECLARE(name)   struct \fBqb_list_head\fP name = { &(name), &(name) }"
+
+.PP
+Declare and initialize a list head\&. 
+.SS "#define qb_list_entry(ptr, type, member)   ((type *)((char *)(ptr)-(char*)(&((type *)0)->member)))"
+
+.PP
+Get the struct for this entry\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIptr,:\fP the &struct list_head pointer\&. 
+.br
+\fItype,:\fP the type of the struct this is embedded in\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_first_entry(ptr, type, member)   \fBqb_list_entry\fP((ptr)->next, type, member)"
+
+.PP
+Get the first element from a list\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIptr,:\fP the &struct list_head pointer\&. 
+.br
+\fItype,:\fP the type of the struct this is embedded in\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each(pos, head)   for (pos = (head)->next; pos != (head); pos = pos->next)"
+
+.PP
+Iterate over a list\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the &struct list_head to use as a loop counter\&. 
+.br
+\fIhead,:\fP the head for your list\&. 
+.RE
+.PP
+
+.PP
+Referenced by qb_list_length()\&.
+.SS "#define qb_list_for_each_entry(pos, head, member)"
+\fBValue:\fP
+.PP
+.nf
+for (pos = qb_list_entry((head)->next, typeof(*pos), member);     \
+             &pos->member != (head);                                    \
+             pos = qb_list_entry(pos->member\&.next, typeof(*pos), member))
+.fi
+.PP
+Iterate over list of given type\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the type * to use as a loop counter\&. 
+.br
+\fIhead,:\fP the head for your list\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each_entry_from(pos, head, member)"
+\fBValue:\fP
+.PP
+.nf
+for (; &pos->member != (head);                                            \
+             pos = qb_list_entry(pos->member\&.next, typeof(*pos), member))
+.fi
+.PP
+Iterate over list of given type from the current point\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the type * to use as a loop cursor\&. 
+.br
+\fIhead,:\fP the head for your list\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each_entry_reverse(pos, head, member)"
+\fBValue:\fP
+.PP
+.nf
+for (pos = qb_list_entry((head)->prev, typeof(*pos), member);  \
+             &pos->member != (head);                                    \
+             pos = qb_list_entry(pos->member\&.prev, typeof(*pos), member))
+.fi
+.PP
+Iterate backwards over list of given type\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the type to use as a loop counter\&. 
+.br
+\fIhead,:\fP the head for your list\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each_entry_safe(pos, n, head, member)"
+\fBValue:\fP
+.PP
+.nf
+for (pos = qb_list_entry((head)->next, typeof(*pos), member),          \
+                n = qb_list_entry(pos->member\&.next, typeof(*pos), member);       \
+             &pos->member != (head);                                            \
+             pos = n, n = qb_list_entry(n->member\&.next, typeof(*n), member))
+.fi
+.PP
+Iterate over list of given type safe against removal of list entry\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the type * to use as a loop cursor\&. 
+.br
+\fIn,:\fP another type * to use as temporary storage 
+.br
+\fIhead,:\fP the head for your list\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each_entry_safe_reverse(pos, n, head, member)"
+\fBValue:\fP
+.PP
+.nf
+for (pos = qb_list_entry((head)->prev, typeof(*pos), member),          \
+                n = qb_list_entry(pos->member\&.prev, typeof(*pos), member);       \
+             &pos->member != (head);                                            \
+             pos = n, n = qb_list_entry(n->member\&.prev, typeof(*n), member))
+.fi
+.PP
+Iterate backwards over list safe against removal\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the type * to use as a loop cursor\&. 
+.br
+\fIn,:\fP another type * to use as temporary storage 
+.br
+\fIhead,:\fP the head for your list\&. 
+.br
+\fImember,:\fP the name of the list_struct within the struct\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each_reverse(pos, head)   for (pos = (head)->prev; pos != (head); pos = pos->prev)"
+
+.PP
+Iterate over a list backwards\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the &struct list_head to use as a loop counter\&. 
+.br
+\fIhead,:\fP the head for your list\&. 
+.RE
+.PP
+
+.SS "#define qb_list_for_each_safe(pos, n, head)"
+\fBValue:\fP
+.PP
+.nf
+for (pos = (head)->next, n = pos->next; pos != (head); \
+                pos = n, n = pos->next)
+.fi
+.PP
+Iterate over a list safe against removal of list entry\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIpos,:\fP the &struct list_head to use as a loop counter\&. 
+.br
+\fIn,:\fP another &struct list_head to use as temporary storage 
+.br
+\fIhead,:\fP the head for your list\&. 
+.RE
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "static void qb_list_add (struct \fBqb_list_head\fP *element, struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Add this element to the list\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIelement\fP the new element to insert\&. 
+.br
+\fIhead\fP pointer to the list head 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, and qb_list_head::prev\&.
+.SS "static void qb_list_add_tail (struct \fBqb_list_head\fP *element, struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Add to the list (but at the end of the list)\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIelement\fP pointer to the element to add 
+.br
+\fIhead\fP pointer to the list head 
+.RE
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_list_add()\fP 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, and qb_list_head::prev\&.
+.SS "static void qb_list_del (struct \fBqb_list_head\fP *_remove)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Delete an entry from the list\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fI_remove\fP the list item to remove 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, and qb_list_head::prev\&.
+.SS "static int32_t qb_list_empty (const struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+A quick test to see if the list is empty (pointing to it's self)\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIhead\fP pointer to the list head 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+boolean true/false 
+.RE
+.PP
+
+.PP
+References qb_list_head::next\&.
+.PP
+Referenced by qb_list_splice(), and qb_list_splice_tail()\&.
+.SS "static void qb_list_init (struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Initialize the list entry\&. Points next and prev pointers to head\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIhead\fP pointer to the list head 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, and qb_list_head::prev\&.
+.SS "static int qb_list_is_last (const struct \fBqb_list_head\fP *list, const struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Tests whether list is the last entry in list head\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIlist,:\fP the entry to test 
+.br
+\fIhead,:\fP the head of the list 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+boolean true/false 
+.RE
+.PP
+
+.PP
+References qb_list_head::next\&.
+.SS "static int32_t qb_list_length (struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Count the number of items in the list\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIhead,:\fP the head for your list\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+length of the list\&. 
+.RE
+.PP
+
+.PP
+References qb_list_for_each\&.
+.SS "static void qb_list_replace (struct \fBqb_list_head\fP *old, struct \fBqb_list_head\fP *new)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Replace old entry by new one\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIold,:\fP the element to be replaced 
+.br
+\fInew,:\fP the new element to insert 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, and qb_list_head::prev\&.
+.SS "static void qb_list_splice (struct \fBqb_list_head\fP *list, struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Join two lists\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIlist\fP the new list to add\&. 
+.br
+\fIhead\fP the place to add it in the first list\&.
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+The 'list' is reinitialised 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, qb_list_head::prev, and qb_list_empty()\&.
+.SS "static void qb_list_splice_tail (struct \fBqb_list_head\fP *list, struct \fBqb_list_head\fP *head)\fC [inline]\fP, \fC [static]\fP"
+
+.PP
+Join two lists, each list being a queue\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIlist,:\fP the new list to add\&. 
+.br
+\fIhead,:\fP the place to add it in the first list\&. 
+.RE
+.PP
+
+.PP
+References qb_list_head::next, qb_list_head::prev, and qb_list_empty()\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

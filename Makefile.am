@@ -1,0 +1,134 @@
+# Copyright (C) 2010 Red Hat, Inc.
+#
+# Authors: Andrew Beekhof <abeekhof@redhat.com>
+#	   Steven Dake <sdake@redhat.com>
+#	   Angus Salkeld <asalkeld@redhat.com>
+#
+# This file is part of libqb.
+#
+# libqb is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 2.1 of the License, or
+# (at your option) any later version.
+#
+# libqb is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with libqb.  If not, see <http://www.gnu.org/licenses/>.
+
+SPEC			= $(PACKAGE_NAME).spec
+
+EXTRA_DIST		= autogen.sh $(SPEC).in \
+			  build-aux/git-version-gen \
+			  build-aux/gitlog-to-changelog \
+			  build-aux/release.mk \
+			  .version
+
+AUTOMAKE_OPTIONS	= foreign
+
+MAINTAINERCLEANFILES	= Makefile.in aclocal.m4 configure depcomp \
+			  config.guess config.sub missing install-sh \
+			  autoheader automake autoconf libtool libtoolize \
+			  ltmain.sh compile build-aux/test-driver
+
+
+ACLOCAL_AMFLAGS		= -I m4
+
+dist_doc_DATA		= COPYING INSTALL README.markdown
+
+SUBDIRS			= include lib docs tools tests examples
+
+doxygen:
+	$(MAKE) -C docs doxygen
+
+dist-clean-local:
+	rm -f autoconf automake autoheader
+
+maintainer-clean-local:
+	rm -rf m4
+	rm -f .version .tarball-version
+
+clean-local:
+	rm -rf $(SPEC) $(DIST_ARCHIVES)
+
+## make rpm/srpm section.
+
+$(SPEC): $(SPEC).in
+	@rm -f $@-t $@
+	@date="$(shell LC_ALL=C date "+%a %b %d %Y")" && \
+	if [ -f .tarball-version ]; then \
+		gitver="$(shell cat .tarball-version)" && \
+		rpmver=$$gitver && \
+		alphatag="" && \
+		dirty="" && \
+		numcomm="0"; \
+	else \
+		gitver="$(shell git describe --abbrev=4 --match='v*' --tags HEAD 2>/dev/null)" && \
+		rpmver=`echo $$gitver | sed -e "s/^v//" -e "s/-.*//g"` && \
+		alphatag=`echo $$gitver | sed -e "s/.*-//" -e "s/^g//"` && \
+		vtag=`echo $$gitver | sed -e "s/-.*//g"` && \
+		numcomm=`git rev-list $$vtag..HEAD | wc -l` && \
+		git update-index --refresh > /dev/null 2>&1 || true && \
+		dirty=`git diff-index --name-only HEAD 2>/dev/null`; \
+	fi && \
+	if [ -n "$$dirty" ]; then dirty="dirty"; else dirty=""; fi && \
+	if [ "$$numcomm" = "0" ]; then \
+		sed \
+			-e "s#@version@#$$rpmver#g" \
+			-e "s#%glo.*alpha.*##g" \
+			-e "s#%glo.*numcomm.*##g" \
+			-e "s#@dirty@#$$dirty#g" \
+			-e "s#@date@#$$date#g" \
+		$< > $@-t; \
+	else \
+		sed \
+			-e "s#@version@#$$rpmver#g" \
+			-e "s#@alphatag@#$$alphatag#g" \
+			-e "s#@numcomm@#$$numcomm#g" \
+			-e "s#@dirty@#$$dirty#g" \
+			-e "s#@date@#$$date#g" \
+		$< > $@-t; \
+	fi; \
+	if [ -z "$$dirty" ]; then sed -i -e "s#%glo.*dirty.*##g" $@-t; fi
+	@chmod a-w $@-t
+	$(AM_V_GEN)mv $@-t $@
+
+RPMBUILDOPTS	= --define "_sourcedir $(abs_builddir)" \
+		  --define "_specdir $(abs_builddir)" \
+		  --define "_builddir $(abs_builddir)" \
+		  --define "_srcrpmdir $(abs_builddir)" \
+		  --define "_rpmdir $(abs_builddir)"
+
+# generates both .tar.[gx]z (backward compatibility)
+tarball: dist
+
+srpm: clean
+	autoreconf -if
+	$(MAKE) $(SPEC) dist-xz
+	rpmbuild $(RPMBUILDOPTS) --nodeps -bs $(SPEC)
+
+rpm: clean
+	autoreconf -if
+	$(MAKE) $(SPEC) dist-xz
+	rpmbuild $(RPMBUILDOPTS) -ba $(SPEC)
+
+# release/versioning
+BUILT_SOURCES	= .version
+.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
+dist-hook: gen-ChangeLog
+	echo $(VERSION) > $(distdir)/.tarball-version
+
+gen_start_date = 2000-01-01
+.PHONY: gen-ChangeLog
+gen-ChangeLog:
+	if test -d .git; then						\
+		$(top_srcdir)/build-aux/gitlog-to-changelog		\
+			--since=$(gen_start_date) > $(distdir)/cl-t;	\
+		rm -f $(distdir)/ChangeLog;				\
+		mv $(distdir)/cl-t $(distdir)/ChangeLog;		\
+	fi

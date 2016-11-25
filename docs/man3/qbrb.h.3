@@ -1,0 +1,574 @@
+.TH "qbrb.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbrb.h \- 
+.PP
+This implements a ring buffer that works in 'chunks' not bytes\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sys/types\&.h>\fP
+.br
+\fC#include <stdint\&.h>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBQB_RB_FLAG_CREATE\fP   0x01"
+.br
+.RI "\fIcreate a ring buffer (rather than open and existing one) \fP"
+.ti -1c
+.RI "#define \fBQB_RB_FLAG_OVERWRITE\fP   0x02"
+.br
+.RI "\fINew calls to \fBqb_rb_chunk_write()\fP will call \fBqb_rb_chunk_reclaim()\fP if there is not enough space\&. \fP"
+.ti -1c
+.RI "#define \fBQB_RB_FLAG_SHARED_THREAD\fP   0x04"
+.br
+.RI "\fIThe ringbuffer will be shared between pthreads not processes\&. \fP"
+.ti -1c
+.RI "#define \fBQB_RB_FLAG_SHARED_PROCESS\fP   0x08"
+.br
+.RI "\fIThe ringbuffer will be shared between processes\&. \fP"
+.ti -1c
+.RI "#define \fBQB_RB_FLAG_NO_SEMAPHORE\fP   0x10"
+.br
+.RI "\fIDon't use semaphores, only atomic ops\&. \fP"
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct qb_ringbuffer_s \fBqb_ringbuffer_t\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBqb_ringbuffer_t\fP * \fBqb_rb_open\fP (const char *name, size_t size, uint32_t flags, size_t shared_user_data_size)"
+.br
+.RI "\fICreate the ring buffer with the given type\&. \fP"
+.ti -1c
+.RI "void \fBqb_rb_close\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIDereference the ringbuffer and if we are the last user destroy it\&. \fP"
+.ti -1c
+.RI "char * \fBqb_rb_name_get\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIGet the name of the ringbuffer\&. \fP"
+.ti -1c
+.RI "void * \fBqb_rb_shared_user_data_get\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIGet a point to user shared data area\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_chunk_write\fP (\fBqb_ringbuffer_t\fP *rb, const void *data, size_t len)"
+.br
+.RI "\fIWrite a chunk to the ring buffer\&. \fP"
+.ti -1c
+.RI "void * \fBqb_rb_chunk_alloc\fP (\fBqb_ringbuffer_t\fP *rb, size_t len)"
+.br
+.RI "\fIAllocate space for a chunk of the given size\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_rb_chunk_commit\fP (\fBqb_ringbuffer_t\fP *rb, size_t len)"
+.br
+.RI "\fIfinalize the chunk\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_chunk_peek\fP (\fBqb_ringbuffer_t\fP *rb, void **data_out, int32_t ms_timeout)"
+.br
+.RI "\fIRead (without reclaiming) the last chunk\&. \fP"
+.ti -1c
+.RI "void \fBqb_rb_chunk_reclaim\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIReclaim the oldest chunk\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_chunk_read\fP (\fBqb_ringbuffer_t\fP *rb, void *data_out, size_t len, int32_t ms_timeout)"
+.br
+.RI "\fIRead the oldest chunk into data_out\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_rb_refcount_get\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIGet the reference count\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_space_free\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIThe amount of free space in the ring buffer\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_space_used\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIThe total amount of data in the buffer\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_chunks_used\fP (\fBqb_ringbuffer_t\fP *rb)"
+.br
+.RI "\fIThe total number of chunks in the buffer\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_rb_write_to_file\fP (\fBqb_ringbuffer_t\fP *rb, int32_t fd)"
+.br
+.RI "\fIWrite the contents of the Ring Buffer to file\&. \fP"
+.ti -1c
+.RI "\fBqb_ringbuffer_t\fP * \fBqb_rb_create_from_file\fP (int32_t fd, uint32_t flags)"
+.br
+.RI "\fILoad the saved ring buffer from file into tempory memory\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_rb_chown\fP (\fBqb_ringbuffer_t\fP *rb, uid_t owner, gid_t group)"
+.br
+.RI "\fILike 'chown' it changes the owner and group of the ringbuffers resources\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_rb_chmod\fP (\fBqb_ringbuffer_t\fP *rb, mode_t mode)"
+.br
+.RI "\fILike 'chmod' it changes the mode of the ringbuffers resources\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This implements a ring buffer that works in 'chunks' not bytes\&. 
+
+So you write/read a complete chunk or not at all\&. There are two types of ring buffer normal and overwrite\&. Overwrite will reclaim the oldest chunks inorder to make way for new ones, the normal version will refuse to write a new chunk if the ring buffer is full\&.
+.PP
+This implementation is capable of working across processes, but one process must only write and the other prrocess read\&.
+.PP
+The read process will do the following: 
+.PP
+.nf
+*       rb = qb_rb_open("test2", 2000, QB_RB_FLAG_SHARED_PROCESS|QB_RB_FLAG_CREATE);
+*       for (i = 0; i < 200; i++) {
+*       try_read_again:
+*               l = qb_rb_chunk_read(rb, (void *)out, 32, 1000);
+*               if (l < 0) {
+*                       goto try_read_again;
+*               }
+*       }
+*       \&.\&.\&.
+*       qb_rb_close(rb);
+* 
+* 
+
+.fi
+.PP
+.PP
+The write process will do the following: 
+.PP
+.nf
+*       rb = qb_rb_open("test2", 2000, QB_RB_FLAG_SHARED_PROCESS);
+*       for (i = 0; i < 200; i++) {
+* try_write_again:
+*               l = qb_rb_chunk_write(rb, &v, sizeof(v));
+*               if (l < sizeof(v)) {
+*                       goto try_write_again;
+*               }
+*       }
+*       \&.\&.\&.
+*       qb_rb_close(rb);
+* 
+
+.fi
+.PP
+.PP
+\fBAuthor:\fP
+.RS 4
+Angus Salkeld asalkeld@redhat.com 
+.RE
+.PP
+
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define QB_RB_FLAG_CREATE   0x01"
+
+.PP
+create a ring buffer (rather than open and existing one) 
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_open()\fP 
+.RE
+.PP
+
+.SS "#define QB_RB_FLAG_NO_SEMAPHORE   0x10"
+
+.PP
+Don't use semaphores, only atomic ops\&. This mean that the timeout passed into \fBqb_rb_chunk_read()\fP will be ignored\&. 
+.SS "#define QB_RB_FLAG_OVERWRITE   0x02"
+
+.PP
+New calls to \fBqb_rb_chunk_write()\fP will call \fBqb_rb_chunk_reclaim()\fP if there is not enough space\&. If this is not set then new writes will be refused\&. 
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_open()\fP 
+.RE
+.PP
+
+.SS "#define QB_RB_FLAG_SHARED_PROCESS   0x08"
+
+.PP
+The ringbuffer will be shared between processes\&. This effects the type of locks/semaphores that are used\&. 
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_open()\fP 
+.RE
+.PP
+
+.SS "#define QB_RB_FLAG_SHARED_THREAD   0x04"
+
+.PP
+The ringbuffer will be shared between pthreads not processes\&. This effects the type of locks/semaphores that are used\&. 
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_open()\fP 
+.RE
+.PP
+
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef struct qb_ringbuffer_s \fBqb_ringbuffer_t\fP"
+
+.SH "Function Documentation"
+.PP 
+.SS "int32_t qb_rb_chmod (\fBqb_ringbuffer_t\fP *rb, mode_tmode)"
+
+.PP
+Like 'chmod' it changes the mode of the ringbuffers resources\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fImode\fP mode to change to 
+.br
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI0\fP == ok 
+.br
+\fI-errno\fP for error 
+.RE
+.PP
+
+.SS "int32_t qb_rb_chown (\fBqb_ringbuffer_t\fP *rb, uid_towner, gid_tgroup)"
+
+.PP
+Like 'chown' it changes the owner and group of the ringbuffers resources\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIowner\fP uid of the owner to change to 
+.br
+\fIgroup\fP gid of the group to change to 
+.br
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+status (0 = ok, -errno for error) 
+.RE
+.PP
+
+.SS "void* qb_rb_chunk_alloc (\fBqb_ringbuffer_t\fP *rb, size_tlen)"
+
+.PP
+Allocate space for a chunk of the given size\&. If type == QB_RB_FLAG_OVERWRITE and NULL is returned, memory corruption of the memory file has occured\&. The ringbuffer should be destroyed\&. If type == QB_RB_NORMAL then when there is not enough space it will return NULL\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.br
+\fIlen\fP (in) the size to allocate\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+pointer to chunk to write to, or NULL (if no space)\&.
+.RE
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_chunk_alloc()\fP 
+.RE
+.PP
+
+.SS "int32_t qb_rb_chunk_commit (\fBqb_ringbuffer_t\fP *rb, size_tlen)"
+
+.PP
+finalize the chunk\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.br
+\fIlen\fP (in) the size of the chunk\&. 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_chunk_peek (\fBqb_ringbuffer_t\fP *rb, void **data_out, int32_tms_timeout)"
+
+.PP
+Read (without reclaiming) the last chunk\&. This function is a way of accessing the next chunk without a memcpy()\&. You can read the chunk data in place\&.
+.PP
+\fBNote:\fP
+.RS 4
+This function will not 'pop' the chunk, you will need to call \fBqb_rb_chunk_reclaim()\fP\&. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.br
+\fIdata_out\fP (out) a pointer to the next chunk to read (not copied)\&. 
+.br
+\fIms_timeout\fP (in) time to wait for new data\&.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the size of the chunk (0 if buffer empty)\&. 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_chunk_read (\fBqb_ringbuffer_t\fP *rb, void *data_out, size_tlen, int32_tms_timeout)"
+
+.PP
+Read the oldest chunk into data_out\&. This is the same as \fBqb_rb_chunk_peek()\fP memcpy() and \fBqb_rb_chunk_reclaim()\fP\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.br
+\fIdata_out\fP (in/out) the chunk will be memcpy'ed into this\&. 
+.br
+\fIlen\fP (in) the size of data_out\&. 
+.br
+\fIms_timeout\fP the amount od time to wait for new data\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the size of the chunk, or error\&. 
+.RE
+.PP
+
+.SS "void qb_rb_chunk_reclaim (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+Reclaim the oldest chunk\&. You will need to call this if using \fBqb_rb_chunk_peek()\fP\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_chunk_write (\fBqb_ringbuffer_t\fP *rb, const void *data, size_tlen)"
+
+.PP
+Write a chunk to the ring buffer\&. This simply calls \fBqb_rb_chunk_alloc()\fP and then \fBqb_rb_chunk_commit()\fP\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.br
+\fIdata\fP (in) the data to write 
+.br
+\fIlen\fP (in) the size of the chunk\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the amount of bytes actually buffered (either len or -1)\&.
+.RE
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_chunk_alloc()\fP 
+.PP
+\fBqb_rb_chunk_commit()\fP 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_chunks_used (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+The total number of chunks in the buffer\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+
+.SS "void qb_rb_close (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+Dereference the ringbuffer and if we are the last user destroy it\&. All files, mmaped memory, semaphores and locks will be destroyed\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+
+.SS "\fBqb_ringbuffer_t\fP* qb_rb_create_from_file (int32_tfd, uint32_tflags)"
+
+.PP
+Load the saved ring buffer from file into tempory memory\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfd\fP file with saved ringbuffer data\&. 
+.br
+\fIflags\fP same flags as passed into \fBqb_rb_open()\fP 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+new ringbuffer instance 
+.RE
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_write_to_file()\fP 
+.RE
+.PP
+
+.SS "char* qb_rb_name_get (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+Get the name of the ringbuffer\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+name\&. 
+.RE
+.PP
+
+.SS "\fBqb_ringbuffer_t\fP* qb_rb_open (const char *name, size_tsize, uint32_tflags, size_tshared_user_data_size)"
+
+.PP
+Create the ring buffer with the given type\&. This creates allocates a ring buffer in shared memory\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIname\fP the unique name of this ringbuffer\&. 
+.br
+\fIsize\fP the requested size\&. 
+.br
+\fIflags\fP or'ed flags 
+.br
+\fIshared_user_data_size\fP size for a shared data area\&. 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+the actual size will be rounded up to the next page size\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+a new ring buffer or NULL if there was a problem\&. 
+.RE
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBQB_RB_FLAG_CREATE\fP, \fBQB_RB_FLAG_OVERWRITE\fP, \fBQB_RB_FLAG_SHARED_THREAD\fP, \fBQB_RB_FLAG_SHARED_PROCESS\fP 
+.RE
+.PP
+
+.SS "int32_t qb_rb_refcount_get (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+Get the reference count\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the number of references 
+.RE
+.PP
+
+.SS "void* qb_rb_shared_user_data_get (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+Get a point to user shared data area\&. 
+.PP
+\fBNote:\fP
+.RS 4
+this is of size 'shared_user_data_size' passed into \fBqb_rb_open()\fP
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+pointer to shared data\&. 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_space_free (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+The amount of free space in the ring buffer\&. 
+.PP
+\fBNote:\fP
+.RS 4
+Some of this space will be consumed by the chunk headers\&. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_space_used (\fBqb_ringbuffer_t\fP *rb)"
+
+.PP
+The total amount of data in the buffer\&. 
+.PP
+\fBNote:\fP
+.RS 4
+This includes the chunk headers (8 bytes per chunk)\&. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+
+.SS "ssize_t qb_rb_write_to_file (\fBqb_ringbuffer_t\fP *rb, int32_tfd)"
+
+.PP
+Write the contents of the Ring Buffer to file\&. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfd\fP open file to write the ringbuffer data to\&. 
+.br
+\fIrb\fP ringbuffer instance 
+.RE
+.PP
+\fBSee Also:\fP
+.RS 4
+\fBqb_rb_create_from_file()\fP 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

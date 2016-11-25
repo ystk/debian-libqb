@@ -1,0 +1,132 @@
+.TH "qbdefs.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbdefs.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBQB_ROUNDUP\fP(x, y)   ((((x) + ((y) - 1)) / (y)) * (y))"
+.br
+.ti -1c
+.RI "#define \fBQB_ABS\fP(i)   (((i) < 0) ? -(i) : (i))"
+.br
+.ti -1c
+.RI "#define \fBQB_MAX\fP(a, b)   (((a) > (b)) ? (a) : (b))"
+.br
+.ti -1c
+.RI "#define \fBQB_MIN\fP(a, b)   (((a) < (b)) ? (a) : (b))"
+.br
+.ti -1c
+.RI "#define \fBQB_FALSE\fP   0"
+.br
+.ti -1c
+.RI "#define \fBQB_TRUE\fP   (!\fBQB_FALSE\fP)"
+.br
+.ti -1c
+.RI "#define \fBqb_bit_value\fP(bit)   (1 << (bit))"
+.br
+.ti -1c
+.RI "#define \fBqb_bit_set\fP(barray, bit)   (barray |= \fBqb_bit_value\fP(bit))"
+.br
+.ti -1c
+.RI "#define \fBqb_bit_clear\fP(barray, bit)   (barray &= ~(\fBqb_bit_value\fP(bit)))"
+.br
+.ti -1c
+.RI "#define \fBqb_bit_is_set\fP(barray, bit)   (barray & \fBqb_bit_value\fP(bit))"
+.br
+.ti -1c
+.RI "#define \fBqb_bit_is_clear\fP(barray, bit)   (!(barray & \fBqb_bit_value\fP(bit)))"
+.br
+.ti -1c
+.RI "#define \fBHZ\fP   100			/* 10ms */"
+.br
+.ti -1c
+.RI "#define \fBQB_TIME_MS_IN_SEC\fP   1000ULL"
+.br
+.ti -1c
+.RI "#define \fBQB_TIME_US_IN_SEC\fP   1000000ULL"
+.br
+.ti -1c
+.RI "#define \fBQB_TIME_NS_IN_SEC\fP   1000000000ULL"
+.br
+.ti -1c
+.RI "#define \fBQB_TIME_US_IN_MSEC\fP   1000ULL"
+.br
+.ti -1c
+.RI "#define \fBQB_TIME_NS_IN_MSEC\fP   1000000ULL"
+.br
+.ti -1c
+.RI "#define \fBQB_TIME_NS_IN_USEC\fP   1000ULL"
+.br
+.ti -1c
+.RI "#define \fBQB_GNUC_DEPRECATED\fP"
+.br
+.ti -1c
+.RI "#define \fBQB_GNUC_DEPRECATED_FOR\fP(f)   \fBQB_GNUC_DEPRECATED\fP"
+.br
+.ti -1c
+.RI "#define \fBQB_GNUC_MAY_ALIAS\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+\fBAuthor:\fP
+.RS 4
+Angus Salkeld asalkeld@redhat.com
+.RE
+.PP
+These are some convience macros and defines\&. 
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define HZ   100			/* 10ms */"
+
+.SS "#define QB_ABS(i)   (((i) < 0) ? -(i) : (i))"
+
+.SS "#define qb_bit_clear(barray, bit)   (barray &= ~(\fBqb_bit_value\fP(bit)))"
+
+.SS "#define qb_bit_is_clear(barray, bit)   (!(barray & \fBqb_bit_value\fP(bit)))"
+
+.SS "#define qb_bit_is_set(barray, bit)   (barray & \fBqb_bit_value\fP(bit))"
+
+.SS "#define qb_bit_set(barray, bit)   (barray |= \fBqb_bit_value\fP(bit))"
+
+.SS "#define qb_bit_value(bit)   (1 << (bit))"
+
+.SS "#define QB_FALSE   0"
+
+.SS "#define QB_GNUC_DEPRECATED"
+
+.SS "#define QB_GNUC_DEPRECATED_FOR(f)   \fBQB_GNUC_DEPRECATED\fP"
+
+.SS "#define QB_GNUC_MAY_ALIAS"
+
+.SS "#define QB_MAX(a, b)   (((a) > (b)) ? (a) : (b))"
+
+.SS "#define QB_MIN(a, b)   (((a) < (b)) ? (a) : (b))"
+
+.SS "#define QB_ROUNDUP(x, y)   ((((x) + ((y) - 1)) / (y)) * (y))"
+
+.SS "#define QB_TIME_MS_IN_SEC   1000ULL"
+
+.SS "#define QB_TIME_NS_IN_MSEC   1000000ULL"
+
+.SS "#define QB_TIME_NS_IN_SEC   1000000000ULL"
+
+.SS "#define QB_TIME_NS_IN_USEC   1000ULL"
+
+.SS "#define QB_TIME_US_IN_MSEC   1000ULL"
+
+.SS "#define QB_TIME_US_IN_SEC   1000000ULL"
+
+.SS "#define QB_TRUE   (!\fBQB_FALSE\fP)"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.
