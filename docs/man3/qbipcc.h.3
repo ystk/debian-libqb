@@ -1,4 +1,4 @@
-.TH "qbipcc.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.TH "qbipcc.h" 3 "Thu Nov 24 2016" "Version 1.0.1" "libqb" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,15 +9,9 @@ Client IPC API\&.
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <qb/qbconfig\&.h>\fP
+\fC#include <sys/types\&.h>\fP
 .br
-\fC#include <pthread\&.h>\fP
-.br
-\fC#include <sys/poll\&.h>\fP
-.br
-\fC#include <sys/socket\&.h>\fP
-.br
-\fC#include <qb/qbhdb\&.h>\fP
+\fC#include <sys/uio\&.h>\fP
 .br
 \fC#include <qb/qbipc_common\&.h>\fP
 .br
@@ -112,7 +106,7 @@ The function \fBqb_ipcc_sendv()\fP sends an iovector request\&. The function \fB
 .PP
 \fBAsynchronous events from the server\fP
 .RS 4
-The \fBqb_ipcc_event_recv()\fP function receives an out-of-band asyncronous message\&. The asynchronous messages are queued and can provide very high out-of-band performance\&. To determine when to call \fBqb_ipcc_event_recv()\fP the \fBqb_ipcc_fd_get()\fP call is used to obtain a file descriptor used in the poll() or select() system calls\&. 
+The \fBqb_ipcc_event_recv()\fP function receives an out-of-band asynchronous message\&. The asynchronous messages are queued and can provide very high out-of-band performance\&. To determine when to call \fBqb_ipcc_event_recv()\fP the \fBqb_ipcc_fd_get()\fP call is used to obtain a file descriptor used in the poll() or select() system calls\&. 
 .RE
 .PP
 

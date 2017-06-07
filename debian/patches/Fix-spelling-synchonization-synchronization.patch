@@ -1,0 +1,21 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Mon, 5 Dec 2016 13:13:52 +0100
+Subject: Fix spelling: synchonization -> synchronization
+
+---
+ include/qb/qbatomic.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/qb/qbatomic.h b/include/qb/qbatomic.h
+index 45c762e..8777e2e 100644
+--- a/include/qb/qbatomic.h
++++ b/include/qb/qbatomic.h
+@@ -52,7 +52,7 @@ extern "C" {
+  * You must not directly read integers or pointers concurrently
+  * accessed by multiple threads, but use the atomic accessor functions
+  * instead. That is, always use qb_atomic_int_get() and qb_atomic_pointer_get()
+- * for read outs. They provide the necessary synchonization mechanisms
++ * for read outs. They provide the necessary synchronization mechanisms
+  * like memory barriers to access memory locations concurrently.
+  *
+  * If you are using those functions for anything apart from

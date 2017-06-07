@@ -1,3 +1,11 @@
 hurd-support.patch
-docs-qbdefs.h-description-must-directly-follow-file.patch
-low-fixed-Spelling-error-of-failure-in-qbhdb.h.patch
+Fix-spelling-synchonization-synchronization.patch
+Fix-spelling-paramaters-parameters.patch
+configure.ac-help-string-cleanup.patch
+Correctly-check-for-the-check-requirement-of-enable-.patch
+configure.ac-emit-the-error-message-right-after-the-.patch
+LTLIBOBJS-is-also-a-Make-variable.patch
+Restrict-ldl-to-where-it-s-actually-needed.patch
+Restrict-pthreads-to-where-it-s-actually-needed.patch
+Restrict-socket-lib-to-where-it-s-actually-needed.patch
+Restrict-nsl-lib-to-where-it-s-actually-needed.patch

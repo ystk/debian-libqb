@@ -1,8 +1,11 @@
-.TH "qbdefs.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.TH "qbdefs.h" 3 "Thu Nov 24 2016" "Version 1.0.1" "libqb" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 qbdefs.h \- 
+.PP
+These are some convience macros and defines\&.  
+
 .SH SYNOPSIS
 .br
 .PP
@@ -43,6 +46,18 @@ qbdefs.h \-
 .RI "#define \fBqb_bit_is_clear\fP(barray, bit)   (!(barray & \fBqb_bit_value\fP(bit)))"
 .br
 .ti -1c
+.RI "#define \fBQB_PP_JOIN_\fP(a, b)   a##b"
+.br
+.ti -1c
+.RI "#define \fBQB_PP_JOIN\fP(a, b)   \fBQB_PP_JOIN_\fP(a, b)"
+.br
+.ti -1c
+.RI "#define \fBQB_PP_STRINGIFY_\fP(arg)   #arg"
+.br
+.ti -1c
+.RI "#define \fBQB_PP_STRINGIFY\fP(arg)   \fBQB_PP_STRINGIFY_\fP(arg)"
+.br
+.ti -1c
 .RI "#define \fBHZ\fP   100			/* 10ms */"
 .br
 .ti -1c
@@ -75,14 +90,16 @@ qbdefs.h \-
 .in -1c
 .SH "Detailed Description"
 .PP 
+These are some convience macros and defines\&. 
+
 
 .PP
 \fBAuthor:\fP
 .RS 4
-Angus Salkeld asalkeld@redhat.com
+Angus Salkeld asalkeld@redhat.com 
 .RE
 .PP
-These are some convience macros and defines\&. 
+
 .SH "Macro Definition Documentation"
 .PP 
 .SS "#define HZ   100			/* 10ms */"
@@ -110,6 +127,14 @@ These are some convience macros and defines\&.
 .SS "#define QB_MAX(a, b)   (((a) > (b)) ? (a) : (b))"
 
 .SS "#define QB_MIN(a, b)   (((a) < (b)) ? (a) : (b))"
+
+.SS "#define QB_PP_JOIN(a, b)   \fBQB_PP_JOIN_\fP(a, b)"
+
+.SS "#define QB_PP_JOIN_(a, b)   a##b"
+
+.SS "#define QB_PP_STRINGIFY(arg)   \fBQB_PP_STRINGIFY_\fP(arg)"
+
+.SS "#define QB_PP_STRINGIFY_(arg)   #arg"
 
 .SS "#define QB_ROUNDUP(x, y)   ((((x) + ((y) - 1)) / (y)) * (y))"
 

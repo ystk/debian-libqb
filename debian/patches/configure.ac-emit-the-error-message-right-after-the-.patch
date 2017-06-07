@@ -1,0 +1,41 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Mon, 5 Dec 2016 12:41:24 +0100
+Subject: configure.ac: emit the error message right after the failed check
+
+---
+ configure.ac | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 3c902f8..7108604 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -115,6 +115,13 @@ AC_SEARCH_LIBS([gethostbyname], [nsl])
+ # look for testing harness "check"
+ PKG_CHECK_MODULES([CHECK], [check >= 0.9.4],[with_check=yes],[with_check=no])
+ AM_CONDITIONAL(HAVE_CHECK, test "${with_check}" = "yes")
++AS_IF([test "x$enable_syslog_tests" = xyes],
++  [AS_IF([test "x$with_check" = xno],
++    [AC_MSG_ERROR([--enable-syslog-tests requires the "check" test harness])],
++    [AC_DEFINE([HAVE_SYSLOG_TESTS], 1,[have syslog tests])
++     AC_MSG_NOTICE([Enabling syslog tests])])])
++AM_CONDITIONAL(HAVE_SYSLOG_TESTS, [test "x${enable_syslog_tests}" = xyes])
++AC_SUBST(HAVE_SYSLOG_TESTS)
+ 
+ # look for GLIB (used for testing integration)
+ PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.0, have_glib=yes, have_glib=no)
+@@ -569,14 +576,6 @@ fi
+ AM_CONDITIONAL(HAVE_SLOW_TESTS, [test "x${enable_slow_tests}" = xyes])
+ AC_SUBST(HAVE_SLOW_TESTS)
+ 
+-AS_IF([test "x$enable_syslog_tests" = xyes],
+-  [AS_IF([test "x$with_check" = xno],
+-    [AC_MSG_ERROR([--enable-syslog-tests requires the "check" test harness])],
+-    [AC_DEFINE([HAVE_SYSLOG_TESTS], 1,[have syslog tests])
+-     AC_MSG_NOTICE([Enabling syslog tests])])])
+-AM_CONDITIONAL(HAVE_SYSLOG_TESTS, [test "x${enable_syslog_tests}" = xyes])
+-AC_SUBST(HAVE_SYSLOG_TESTS)
+-
+ # --- callsite sections ---
+ if test "x${GCC}" = xyes; then
+ 	AC_MSG_CHECKING([whether GCC supports __attribute__((section()) + ld supports orphan sections])

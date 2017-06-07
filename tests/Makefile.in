@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -80,7 +81,7 @@ build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = bmc$(EXEEXT) bmcpt$(EXEEXT) bms$(EXEEXT) \
 	rbreader$(EXEEXT) rbwriter$(EXEEXT) bench-log$(EXEEXT) \
-	format_compare_speed$(EXEEXT) loop$(EXEEXT)
+	format_compare_speed$(EXEEXT) loop$(EXEEXT) print_ver$(EXEEXT)
 @HAVE_DICT_WORDS_TRUE@@HAVE_SLOW_TESTS_TRUE@am__append_1 = make-log-test.sh
 @HAVE_DICT_WORDS_TRUE@@HAVE_SLOW_TESTS_TRUE@am__append_2 = auto_write_logs.c
 @HAVE_DICT_WORDS_TRUE@@HAVE_SLOW_TESTS_TRUE@am__append_3 = auto_write_logs.c
@@ -98,10 +99,14 @@ noinst_PROGRAMS = bmc$(EXEEXT) bmcpt$(EXEEXT) bms$(EXEEXT) \
 @HAVE_CHECK_TRUE@	file_change_bytes$(EXEEXT) $(am__EXEEXT_1)
 @HAVE_CHECK_TRUE@@HAVE_SLOW_TESTS_TRUE@am__append_5 = util.test
 @HAVE_CHECK_TRUE@@HAVE_SLOW_TESTS_TRUE@am__append_6 = util.test
-@HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@am__append_7 = _syslog_override.la
+@HAVE_CHECK_TRUE@@HAVE_FAILURE_INJECTION_TRUE@am__append_7 = _failure_injection.la
+@HAVE_CHECK_TRUE@@HAVE_FAILURE_INJECTION_TRUE@am__append_8 = _failure_injection.la
+@HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@am__append_9 = _syslog_override.la
+@HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@am__append_10 = _syslog_override.la
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/test.conf.in $(top_srcdir)/build-aux/depcomp \
+	$(srcdir)/test.conf.in $(am__dist_check_SCRIPTS_DIST) \
+	$(top_srcdir)/build-aux/depcomp $(noinst_HEADERS) \
 	$(top_srcdir)/build-aux/test-driver
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -115,16 +120,26 @@ CONFIG_HEADER = $(top_builddir)/include/config.h \
 	$(top_builddir)/include/qb/qbconfig.h
 CONFIG_CLEAN_FILES = test.conf
 CONFIG_CLEAN_VPATH_FILES =
+_failure_injection_la_LIBADD =
+am___failure_injection_la_SOURCES_DIST = _failure_injection.c \
+	_failure_injection.h
+@HAVE_CHECK_TRUE@@HAVE_FAILURE_INJECTION_TRUE@am__failure_injection_la_OBJECTS = _failure_injection.lo
+_failure_injection_la_OBJECTS = $(am__failure_injection_la_OBJECTS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
+_failure_injection_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(_failure_injection_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
+@HAVE_CHECK_TRUE@@HAVE_FAILURE_INJECTION_TRUE@am__failure_injection_la_rpath =
 _syslog_override_la_LIBADD =
 am___syslog_override_la_SOURCES_DIST = _syslog_override.c \
 	_syslog_override.h
 @HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@am__syslog_override_la_OBJECTS =  \
 @HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@	_syslog_override.lo
 _syslog_override_la_OBJECTS = $(am__syslog_override_la_OBJECTS)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 _syslog_override_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(_syslog_override_la_LDFLAGS) \
@@ -182,7 +197,8 @@ am__ipc_test_SOURCES_DIST = check_ipc.c \
 	$(top_builddir)/include/qb/qbipcs.h
 @HAVE_CHECK_TRUE@am_ipc_test_OBJECTS = ipc_test-check_ipc.$(OBJEXT)
 ipc_test_OBJECTS = $(am_ipc_test_OBJECTS)
-@HAVE_CHECK_TRUE@ipc_test_DEPENDENCIES = $(top_builddir)/lib/libqb.la
+@HAVE_CHECK_TRUE@ipc_test_DEPENDENCIES = $(top_builddir)/lib/libqb.la \
+@HAVE_CHECK_TRUE@	$(am__append_7)
 ipc_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ipc_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -191,7 +207,7 @@ am__log_test_SOURCES_DIST = check_log.c \
 @HAVE_CHECK_TRUE@am_log_test_OBJECTS = log_test-check_log.$(OBJEXT)
 log_test_OBJECTS = $(am_log_test_OBJECTS)
 @HAVE_CHECK_TRUE@log_test_DEPENDENCIES = $(top_builddir)/lib/libqb.la \
-@HAVE_CHECK_TRUE@	$(am__append_7)
+@HAVE_CHECK_TRUE@	$(am__append_9)
 log_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(log_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -216,6 +232,9 @@ map_test_OBJECTS = $(am_map_test_OBJECTS)
 map_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(map_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+print_ver_SOURCES = print_ver.c
+print_ver_OBJECTS = print_ver.$(OBJEXT)
+print_ver_LDADD = $(LDADD)
 am__rb_test_SOURCES_DIST = check_rb.c \
 	$(top_builddir)/include/qb/qbrb.h
 @HAVE_CHECK_TRUE@am_rb_test_OBJECTS = rb_test-check_rb.$(OBJEXT)
@@ -240,6 +259,7 @@ util_test_OBJECTS = $(am_util_test_OBJECTS)
 util_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(util_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am__dist_check_SCRIPTS_DIST = resources.test blackbox-segfault.sh
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -274,15 +294,17 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(_syslog_override_la_SOURCES) $(array_test_SOURCES) \
+SOURCES = $(_failure_injection_la_SOURCES) \
+	$(_syslog_override_la_SOURCES) $(array_test_SOURCES) \
 	$(bench_log_SOURCES) $(nodist_bench_log_SOURCES) \
 	$(bmc_SOURCES) $(bmcpt_SOURCES) $(bms_SOURCES) \
 	$(crash_test_dummy_SOURCES) $(file_change_bytes_SOURCES) \
 	$(format_compare_speed_SOURCES) $(ipc_test_SOURCES) \
 	$(log_test_SOURCES) $(loop_SOURCES) $(loop_test_SOURCES) \
-	$(map_test_SOURCES) $(rb_test_SOURCES) $(rbreader_SOURCES) \
-	$(rbwriter_SOURCES) $(util_test_SOURCES)
-DIST_SOURCES = $(am___syslog_override_la_SOURCES_DIST) \
+	$(map_test_SOURCES) print_ver.c $(rb_test_SOURCES) \
+	$(rbreader_SOURCES) $(rbwriter_SOURCES) $(util_test_SOURCES)
+DIST_SOURCES = $(am___failure_injection_la_SOURCES_DIST) \
+	$(am___syslog_override_la_SOURCES_DIST) \
 	$(am__array_test_SOURCES_DIST) $(bench_log_SOURCES) \
 	$(bmc_SOURCES) $(bmcpt_SOURCES) $(bms_SOURCES) \
 	$(am__crash_test_dummy_SOURCES_DIST) \
@@ -290,13 +312,14 @@ DIST_SOURCES = $(am___syslog_override_la_SOURCES_DIST) \
 	$(format_compare_speed_SOURCES) $(am__ipc_test_SOURCES_DIST) \
 	$(am__log_test_SOURCES_DIST) $(loop_SOURCES) \
 	$(am__loop_test_SOURCES_DIST) $(am__map_test_SOURCES_DIST) \
-	$(am__rb_test_SOURCES_DIST) $(rbreader_SOURCES) \
+	print_ver.c $(am__rb_test_SOURCES_DIST) $(rbreader_SOURCES) \
 	$(rbwriter_SOURCES) $(am__util_test_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+HEADERS = $(noinst_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -679,6 +702,7 @@ MAINTAINERCLEANFILES = Makefile.in $(am__append_3)
 EXTRA_DIST = $(am__append_1) $(am__append_4)
 CLEANFILES = $(auto_c_files) $(am__append_2)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include
+noinst_HEADERS = check_common.h
 format_compare_speed_SOURCES = format_compare_speed.c $(top_builddir)/include/qb/qbutil.h
 format_compare_speed_LDADD = $(top_builddir)/lib/libqb.la
 bmc_SOURCES = bmc.c $(top_builddir)/include/qb/qbipcc.h
@@ -697,7 +721,7 @@ loop_LDADD = $(top_builddir)/lib/libqb.la
 inc_dir = $(top_srcdir)/include/qb
 public_headers = $(sort $(patsubst %.in,%,$(subst $(inc_dir)/,,$(shell \
 	printf 'include $(inc_dir)/Makefile.am\n\n%%.var:\n\t@echo $$($$*)' \
-	| ${MAKE} --no-print-directory -f- inst_HEADERS.var \
+	| MAKEFLAGS= ${MAKE} --no-print-directory -f- inst_HEADERS.var \
 	|| echo $(inc_dir)/qb*.h*))))
 
 auto_c_files = $(patsubst %.h,auto_check_header_%.c,$(public_headers))
@@ -705,7 +729,8 @@ auto_c_files = $(patsubst %.h,auto_check_header_%.c,$(public_headers))
 bench_log_SOURCES = bench-log.c $(top_builddir)/include/qb/qblog.h
 bench_log_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include
 bench_log_LDADD = $(top_builddir)/lib/libqb.la
-@HAVE_CHECK_TRUE@check_SCRIPTS = resources.test blackbox-segfault.sh
+@HAVE_CHECK_TRUE@check_LTLIBRARIES = $(am__append_8) $(am__append_10)
+@HAVE_CHECK_TRUE@dist_check_SCRIPTS = resources.test blackbox-segfault.sh
 @HAVE_CHECK_TRUE@file_change_bytes_SOURCES = file_change_bytes.c
 @HAVE_CHECK_TRUE@crash_test_dummy_SOURCES = crash_test_dummy.c $(top_builddir)/include/qb/qblog.h
 @HAVE_CHECK_TRUE@crash_test_dummy_CFLAGS = @CHECK_CFLAGS@ -I$(top_srcdir)/include
@@ -724,12 +749,14 @@ bench_log_LDADD = $(top_builddir)/lib/libqb.la
 @HAVE_CHECK_TRUE@loop_test_LDADD = $(top_builddir)/lib/libqb.la @CHECK_LIBS@
 @HAVE_CHECK_TRUE@ipc_test_SOURCES = check_ipc.c $(top_builddir)/include/qb/qbipcc.h $(top_builddir)/include/qb/qbipcs.h
 @HAVE_CHECK_TRUE@ipc_test_CFLAGS = @CHECK_CFLAGS@ -I$(top_srcdir)/include
-@HAVE_CHECK_TRUE@ipc_test_LDADD = $(top_builddir)/lib/libqb.la @CHECK_LIBS@
+@HAVE_CHECK_TRUE@ipc_test_LDADD = $(top_builddir)/lib/libqb.la \
+@HAVE_CHECK_TRUE@	@CHECK_LIBS@ $(am__append_7)
+@HAVE_CHECK_TRUE@@HAVE_FAILURE_INJECTION_TRUE@_failure_injection_la_SOURCES = _failure_injection.c _failure_injection.h
+@HAVE_CHECK_TRUE@@HAVE_FAILURE_INJECTION_TRUE@_failure_injection_la_LDFLAGS = -module
 @HAVE_CHECK_TRUE@log_test_SOURCES = check_log.c $(top_builddir)/include/qb/qblog.h
 @HAVE_CHECK_TRUE@log_test_CFLAGS = @CHECK_CFLAGS@ -I$(top_srcdir)/include
 @HAVE_CHECK_TRUE@log_test_LDADD = $(top_builddir)/lib/libqb.la \
-@HAVE_CHECK_TRUE@	@CHECK_LIBS@ $(am__append_7)
-@HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@check_LTLIBRARIES = _syslog_override.la
+@HAVE_CHECK_TRUE@	@CHECK_LIBS@ $(am__append_9)
 @HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@_syslog_override_la_SOURCES = _syslog_override.c _syslog_override.h
 @HAVE_CHECK_TRUE@@HAVE_SYSLOG_TESTS_TRUE@_syslog_override_la_LDFLAGS = -module
 @HAVE_CHECK_TRUE@util_test_SOURCES = check_util.c $(top_builddir)/include/qb/qbutil.h
@@ -782,6 +809,9 @@ clean-checkLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+
+_failure_injection.la: $(_failure_injection_la_OBJECTS) $(_failure_injection_la_DEPENDENCIES) $(EXTRA__failure_injection_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(_failure_injection_la_LINK) $(am__failure_injection_la_rpath) $(_failure_injection_la_OBJECTS) $(_failure_injection_la_LIBADD) $(LIBS)
 
 _syslog_override.la: $(_syslog_override_la_OBJECTS) $(_syslog_override_la_DEPENDENCIES) $(EXTRA__syslog_override_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(_syslog_override_la_LINK) $(am__syslog_override_la_rpath) $(_syslog_override_la_OBJECTS) $(_syslog_override_la_LIBADD) $(LIBS)
@@ -856,6 +886,10 @@ map.test$(EXEEXT): $(map_test_OBJECTS) $(map_test_DEPENDENCIES) $(EXTRA_map_test
 	@rm -f map.test$(EXEEXT)
 	$(AM_V_CCLD)$(map_test_LINK) $(map_test_OBJECTS) $(map_test_LDADD) $(LIBS)
 
+print_ver$(EXEEXT): $(print_ver_OBJECTS) $(print_ver_DEPENDENCIES) $(EXTRA_print_ver_DEPENDENCIES) 
+	@rm -f print_ver$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(print_ver_OBJECTS) $(print_ver_LDADD) $(LIBS)
+
 rb.test$(EXEEXT): $(rb_test_OBJECTS) $(rb_test_DEPENDENCIES) $(EXTRA_rb_test_DEPENDENCIES) 
 	@rm -f rb.test$(EXEEXT)
 	$(AM_V_CCLD)$(rb_test_LINK) $(rb_test_OBJECTS) $(rb_test_LDADD) $(LIBS)
@@ -875,6 +909,7 @@ util.test$(EXEEXT): $(util_test_OBJECTS) $(util_test_DEPENDENCIES) $(EXTRA_util_
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/_failure_injection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/_syslog_override.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array_test-check_array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bench_log-auto_write_logs.Po@am__quote@
@@ -890,6 +925,7 @@ mostlyclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loop_test-check_loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/map_test-check_map.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_ver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rb_test-check_rb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rbreader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rbwriter.Po@am__quote@
@@ -1258,7 +1294,7 @@ check-TESTS:
 	log_list=`echo $$log_list`; trs_list=`echo $$trs_list`; \
 	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG) TEST_LOGS="$$log_list"; \
 	exit $$?;
-recheck: all $(check_LTLIBRARIES) $(check_PROGRAMS) $(check_SCRIPTS)
+recheck: all $(check_LTLIBRARIES) $(check_PROGRAMS) $(dist_check_SCRIPTS)
 	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 	@set +e; $(am__set_TESTS_bases); \
 	bases=`for i in $$bases; do echo $$i; done \
@@ -1323,10 +1359,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES) $(check_PROGRAMS) \
-	  $(check_SCRIPTS)
+	  $(dist_check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) $(HEADERS)
 installdirs:
 install: install-am
 install-exec: install-exec-am

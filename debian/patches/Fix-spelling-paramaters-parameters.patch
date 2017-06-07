@@ -1,0 +1,21 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Mon, 5 Dec 2016 13:14:17 +0100
+Subject: Fix spelling: paramaters -> parameters
+
+---
+ include/qb/qbloop.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/qb/qbloop.h b/include/qb/qbloop.h
+index a1e4443..ff5a7d2 100644
+--- a/include/qb/qbloop.h
++++ b/include/qb/qbloop.h
+@@ -115,7 +115,7 @@ int32_t qb_loop_job_add(qb_loop_t *l,
+  * This will try to delete the job if it hasn't run yet.
+  *
+  * @note this will remove the first job that matches the
+- * paramaters (priority, data, dispatch_fn).
++ * parameters (priority, data, dispatch_fn).
+  *
+  * @param l pointer to the loop instance
+  * @param p the priority

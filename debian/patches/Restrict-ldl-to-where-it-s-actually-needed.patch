@@ -1,0 +1,193 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Mon, 5 Dec 2016 13:28:50 +0100
+Subject: Restrict -ldl to where it's actually needed
+
+This reduces overlinking of qb-blackbox.  Being a seldom used executable,
+the gains are mostly theoretical, but at least this silences warnings
+from some QA tools.
+---
+ configure.ac           |  5 +++-
+ lib/Makefile.am        |  2 +-
+ m4/ax_restore_flags.m4 | 52 ++++++++++++++++++++++++++++++++++++
+ m4/ax_save_flags.m4    | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/Makefile.am      |  1 +
+ 5 files changed, 129 insertions(+), 2 deletions(-)
+ create mode 100644 m4/ax_restore_flags.m4
+ create mode 100644 m4/ax_save_flags.m4
+
+diff --git a/configure.ac b/configure.ac
+index 7108604..91b5c65 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -108,7 +108,10 @@ dnl it will always be "none needed", but it is not true
+ dnl when linking libraries. Looks like a bug.
+ AC_SEARCH_LIBS([pthread_create], [pthread])
+ AC_SEARCH_LIBS([mq_open], [rt])
+-AC_SEARCH_LIBS([dlopen], [dl])
++AX_SAVE_FLAGS
++AC_SEARCH_LIBS([dlopen],[dl],,[AC_MSG_ERROR([cannot find dlopen() function])])
++AC_SUBST([dlopen_LIBS],[$LIBS])
++AX_RESTORE_FLAGS
+ AC_SEARCH_LIBS([socket], [socket])
+ AC_SEARCH_LIBS([gethostbyname], [nsl])
+ 
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index cb81787..5e6fe1e 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -40,7 +40,7 @@ source_to_lint		= util.c hdb.c ringbuffer.c ringbuffer_helper.c \
+ 			  map.c skiplist.c hashtable.c trie.c
+ 
+ libqb_la_SOURCES	= $(source_to_lint) unix.c
+-libqb_la_LIBADD	        = $(LTLIBOBJS)
++libqb_la_LIBADD	        = $(LTLIBOBJS) $(dlopen_LIBS)
+ 
+ AM_LDFLAGS 	= $(LDFLAGS_COPY:-Bsymbolic-functions=)
+ 
+diff --git a/m4/ax_restore_flags.m4 b/m4/ax_restore_flags.m4
+new file mode 100644
+index 0000000..aafd363
+--- /dev/null
++++ b/m4/ax_restore_flags.m4
+@@ -0,0 +1,52 @@
++# ===========================================================================
++#     http://www.gnu.org/software/autoconf-archive/ax_restore_flags.html
++# ===========================================================================
++#
++# SYNOPSIS
++#
++#   AX_RESTORE_FLAGS([namespace])
++#
++# DESCRIPTION
++#
++#   Restore common compilation flags from temporary variables.
++#
++#   Compilation flags includes: CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS, LIBS,
++#   OBJCFLAGS.
++#
++#   By default these flags are restored to a global (empty) namespace, but
++#   user could restore from specific NAMESPACE by using
++#   AX_RESTORE_FLAGS(NAMESPACE) macro.
++#
++#   Typical usage is like:
++#
++#     AX_SAVE_FLAGS(mypackage)
++#     CPPFLAGS="-Imypackagespath ${CPPFLAGS}"
++#     dnl ... do some detection ...
++#     AX_RESTORE_FLAGS(mypackage)
++#
++# LICENSE
++#
++#   Copyright (c) 2009 Filippo Giunchedi <filippo@esaurito.net>
++#   Copyright (c) 2011 The Board of Trustees of the Leland Stanford Junior University
++#   Copyright (c) 2011 Russ Allbery <rra@stanford.edu>
++#   Copyright (c) 2013 Bastien ROUCARIES <roucaries.bastien+autoconf@gmail.com>
++#
++#   Copying and distribution of this file, with or without modification, are
++#   permitted in any medium without royalty provided the copyright notice
++#   and this notice are preserved. This file is offered as-is, without any
++#   warranty.
++
++#serial 6
++
++# save one flag in name space
++AC_DEFUN([_AX_RESTORE_ONE_FLAG],[dnl
++  AS_VAR_PUSHDEF([_ax_restore_flag_var], [$2[]_$1[]_ax_save_flags])
++  AS_VAR_COPY($2[],_ax_restore_flag_var)
++  AS_VAR_POPDEF([_ax_restore_flag_var])
++])
++
++AC_DEFUN([AX_RESTORE_FLAGS], [dnl
++   m4_foreach([FLAG], dnl
++	      [_AX_SAVE_FLAGS_LIST()], dnl
++	      [_AX_RESTORE_ONE_FLAG([$1],FLAG)])
++])
+diff --git a/m4/ax_save_flags.m4 b/m4/ax_save_flags.m4
+new file mode 100644
+index 0000000..39f45be
+--- /dev/null
++++ b/m4/ax_save_flags.m4
+@@ -0,0 +1,71 @@
++# ===========================================================================
++#       http://www.gnu.org/software/autoconf-archive/ax_save_flags.html
++# ===========================================================================
++#
++# SYNOPSIS
++#
++#   AX_SAVE_FLAGS([NAMESPACE])
++#
++# DESCRIPTION
++#
++#   Save common compilation flags into temporary variables.
++#
++#   Compilation flags includes: CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS, LIBS,
++#   OBJCFLAGS.
++#
++#   By default these flags are saved to a global (empty) namespace, but user
++#   could specify a specific NAMESPACE to AX_SAVE_FLAGS macro and latter
++#   restore it by using AX_RESTORE_FLAGS(NAMESPACE).
++#
++#     AX_SAVE_FLAGS(mypackage)
++#     CPPFLAGS="-Imypackagespath ${CPPFLAGS}"
++#     dnl .. do some detection ...
++#     AX_RESTORE_FLAGS(mypackage)
++#
++# LICENSE
++#
++#   Copyright (c) 2009 Filippo Giunchedi <filippo@esaurito.net>
++#   Copyright (c) 2011 The Board of Trustees of the Leland Stanford Junior University
++#   Copyright (c) 2011 Russ Allbery <rra@stanford.edu>
++#   Copyright (c) 2013 Bastien ROUCARIES <roucaries.bastien+autoconf@gmail.com>
++#
++#   Copying and distribution of this file, with or without modification, are
++#   permitted in any medium without royalty provided the copyright notice
++#   and this notice are preserved. This file is offered as-is, without any
++#   warranty.
++
++#serial 7
++
++# list of flag to save
++AC_DEFUN([_AX_SAVE_FLAGS_LIST],[dnl
++[CCASFLAGS],dnl
++[CFLAGS],dnl
++[CPPFLAGS],dnl
++[CXXFLAGS],dnl
++[ERLCFLAGS],dnl
++[FCFLAGS],dnl
++[FCLIBS],dnl
++[FFLAGS],dnl
++[FLIBS],dnl
++[GCJFLAGS],dnl
++[JAVACFLAGS],dnl
++[LDFLAGS],dnl
++[LIBS],dnl
++[OBJCFLAGS],dnl
++[OBJCXXFLAGS],dnl
++[UPCFLAGS],dnl
++[VALAFLAGS]dnl
++])
++
++# save one flag in name space
++AC_DEFUN([_AX_SAVE_ONE_FLAG],[
++  AS_VAR_PUSHDEF([_ax_save_flag_var], [$2[]_$1[]_ax_save_flags])
++  AS_VAR_COPY(_ax_save_flag_var, $2[])
++  AS_VAR_POPDEF([_ax_save_flag_var])
++])
++
++AC_DEFUN([AX_SAVE_FLAGS],[dnl
++   m4_foreach([FLAG], dnl
++	      [_AX_SAVE_FLAGS_LIST()], dnl
++	      [_AX_SAVE_ONE_FLAG([$1],FLAG)])
++])
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index f7736d7..e3568bd 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -147,6 +147,7 @@ ipc_test_LDADD += _failure_injection.la
+ check_LTLIBRARIES += _failure_injection.la
+ _failure_injection_la_SOURCES = _failure_injection.c _failure_injection.h
+ _failure_injection_la_LDFLAGS = -module
++_failure_injection_la_LIBADD = $(dlopen_LIBS)
+ endif
+ 
+ log_test_SOURCES = check_log.c $(top_builddir)/include/qb/qblog.h

@@ -3,7 +3,7 @@ Priority: optional
 Maintainer: Debian HA Maintainers <debian-ha-maintainers@lists.alioth.debian.org>
 Uploaders:
            Richard B Winters <rik@mmogp.com>,
-           Ferenc Wágner <wferi@niif.hu>,
+           Ferenc Wágner <wferi@debian.org>,
            Christoph Berg <myon@debian.org>,
            Adrian Vondendriesch <adrian.vondendriesch@credativ.de>
 Build-Depends:

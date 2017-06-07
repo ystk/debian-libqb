@@ -21,6 +21,9 @@
 /* Define to 1 if your system has a working `chown' function. */
 #undef HAVE_CHOWN
 
+/* Define to 1 if clock_getres(CLOCK_MONOTONIC, &ts) works */
+#undef HAVE_CLOCK_GETRES_MONOTONIC
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
 
@@ -42,6 +45,9 @@
 
 /* Define to 1 if you have the <errno.h> header file. */
 #undef HAVE_ERRNO_H
+
+/* have failure injection */
+#undef HAVE_FAILURE_INJECTION
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
@@ -124,6 +130,9 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
+/* Define to 1 if you have the `openat' function. */
+#undef HAVE_OPENAT
+
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 
@@ -144,12 +153,6 @@
 
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
-
-/* Define to 1 if you have the `sched_get_priority_max' function. */
-#undef HAVE_SCHED_GET_PRIORITY_MAX
-
-/* Define to 1 if you have the `sched_setscheduler' function. */
-#undef HAVE_SCHED_SETSCHEDULER
 
 /* Define to 1 if you have the `semtimedop' function. */
 #undef HAVE_SEMTIMEDOP
@@ -280,6 +283,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `unlinkat' function. */
+#undef HAVE_UNLINKAT
+
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
 
@@ -362,6 +368,9 @@
 /* shared and fixed mmap must align on 16k */
 #undef QB_FORCE_SHM_ALIGN
 
+/* Compiling for GNU/Hurd platform */
+#undef QB_GNU
+
 /* Enabling code using __attribute__((section)) */
 #undef QB_HAVE_ATTRIBUTE_SECTION
 
@@ -370,6 +379,18 @@
 
 /* Compiling for Solaris platform */
 #undef QB_SOLARIS
+
+/* libqb major version */
+#undef QB_VER_MAJOR
+
+/* libqb patch version */
+#undef QB_VER_MICRO
+
+/* libqb minor version */
+#undef QB_VER_MINOR
+
+/* libqb patch version */
+#undef QB_VER_REST
 
 /* Socket directory */
 #undef SOCKETDIR

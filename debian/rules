@@ -6,9 +6,6 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 # Ensure that we link against all needed libraries (cf. Policy 10.2)
 export DEB_LDFLAGS_MAINT_APPEND=-Wl,-z,defs
 
-# Avoid useless dependencies in the utilities
-export DEB_LDFLAGS_MAINT_APPEND+=-Wl,--as-needed
-
 DEB_BUILD_ARCH = $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
 # verbose testsuite results (#754692)
@@ -16,10 +13,6 @@ export VERBOSE=1
 
 %:
 	dh $@ --parallel --with autoreconf
-
-# Avoid useless dependencies in the library
-override_dh_autoreconf:
-	dh_autoreconf --as-needed
 
 override_dh_auto_configure:
 	dh_auto_configure -- \

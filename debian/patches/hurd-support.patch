@@ -3,34 +3,16 @@ Date: Sat, 18 Jun 2016 13:33:38 +0200
 Subject: hurd-support
 
 ---
- configure.ac     |  5 +++++
  lib/ipc_setup.c  |  6 +++---
  lib/ipc_socket.c | 14 +++++++-------
- lib/log_thread.c |  4 ++++
  lib/unix.c       |  2 +-
- 5 files changed, 20 insertions(+), 11 deletions(-)
+ 3 files changed, 11 insertions(+), 11 deletions(-)
 
-diff --git a/configure.ac b/configure.ac
-index dacc7e5..6383802 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -335,6 +335,11 @@ case "$host_os" in
- 		CP=rsync
- 		AC_MSG_RESULT([Solaris])
- 	;;
-+	*gnu*)
-+		AC_DEFINE_UNQUOTED([QB_GNU], [1],
-+				   [Compiling for GNU/Hurd platform])
-+		AC_MSG_RESULT([GNU])
-+	;;
- 	*)
- 		AC_MSG_ERROR([Unsupported OS? hmmmm])
- 	;;
 diff --git a/lib/ipc_setup.c b/lib/ipc_setup.c
-index 700de94..1a39105 100644
+index e4beeff..1724fb2 100644
 --- a/lib/ipc_setup.c
 +++ b/lib/ipc_setup.c
-@@ -285,7 +285,7 @@ qb_ipcc_stream_sock_connect(const char *socket_name, int32_t * sock_pt)
+@@ -286,7 +286,7 @@ qb_ipcc_stream_sock_connect(const char *socket_name, int32_t * sock_pt)
  	address.sun_len = QB_SUN_LEN(&address);
  #endif
  
@@ -39,7 +21,7 @@ index 700de94..1a39105 100644
  	snprintf(address.sun_path + 1, UNIX_PATH_MAX - 1, "%s", socket_name);
  #else
  	snprintf(address.sun_path, sizeof(address.sun_path), "%s/%s", SOCKETDIR,
-@@ -534,7 +534,7 @@ qb_ipcs_us_publish(struct qb_ipcs_service * s)
+@@ -535,7 +535,7 @@ qb_ipcs_us_publish(struct qb_ipcs_service * s)
  #endif
  
  	qb_util_log(LOG_INFO, "server name: %s", s->name);
@@ -48,7 +30,7 @@ index 700de94..1a39105 100644
  	snprintf(un_addr.sun_path + 1, UNIX_PATH_MAX - 1, "%s", s->name);
  #else
  	{
-@@ -566,7 +566,7 @@ qb_ipcs_us_publish(struct qb_ipcs_service * s)
+@@ -567,7 +567,7 @@ qb_ipcs_us_publish(struct qb_ipcs_service * s)
  	 * Allow everyone to write to the socket since the IPC layer handles
  	 * security automatically
  	 */
@@ -58,10 +40,10 @@ index 700de94..1a39105 100644
  #endif
  #ifdef SO_PASSCRED
 diff --git a/lib/ipc_socket.c b/lib/ipc_socket.c
-index 68ff5e5..96c1c18 100644
+index db8676b..09981b4 100644
 --- a/lib/ipc_socket.c
 +++ b/lib/ipc_socket.c
-@@ -50,7 +50,7 @@ set_sock_addr(struct sockaddr_un *address, const char *socket_name)
+@@ -51,7 +51,7 @@ set_sock_addr(struct sockaddr_un *address, const char *socket_name)
  	address->sun_len = QB_SUN_LEN(address);
  #endif
  
@@ -70,7 +52,7 @@ index 68ff5e5..96c1c18 100644
  	snprintf(address->sun_path + 1, UNIX_PATH_MAX - 1, "%s", socket_name);
  #else
  	snprintf(address->sun_path, sizeof(address->sun_path), "%s/%s", SOCKETDIR,
-@@ -80,7 +80,7 @@ qb_ipc_dgram_sock_setup(const char *base_name,
+@@ -81,7 +81,7 @@ qb_ipc_dgram_sock_setup(const char *base_name,
  	}
  	snprintf(sock_path, PATH_MAX, "%s-%s", base_name, service_name);
  	set_sock_addr(&local_address, sock_path);
@@ -79,7 +61,7 @@ index 68ff5e5..96c1c18 100644
  	res = unlink(local_address.sun_path);
  #endif
  	res = bind(request_fd, (struct sockaddr *)&local_address,
-@@ -315,7 +315,7 @@ _finish_connecting(struct qb_ipc_one_way *one_way)
+@@ -316,7 +316,7 @@ _finish_connecting(struct qb_ipc_one_way *one_way)
  static void
  qb_ipcc_us_disconnect(struct qb_ipcc_connection *c)
  {
@@ -88,7 +70,7 @@ index 68ff5e5..96c1c18 100644
    struct sockaddr_un un_addr;
    socklen_t un_addr_len = sizeof(struct sockaddr_un);
    char *base_name;
-@@ -326,7 +326,7 @@ qb_ipcc_us_disconnect(struct qb_ipcc_connection *c)
+@@ -327,7 +327,7 @@ qb_ipcc_us_disconnect(struct qb_ipcc_connection *c)
  	munmap(c->request.u.us.shared_data, SHM_CONTROL_SIZE);
  	unlink(c->request.u.us.shared_file_name);
  
@@ -97,7 +79,7 @@ index 68ff5e5..96c1c18 100644
      if (getsockname(c->response.u.us.sock, (struct sockaddr *)&un_addr, &un_addr_len) == 0) {
        length = strlen(un_addr.sun_path);
        base_name = strndup(un_addr.sun_path,length-9);
-@@ -450,7 +450,7 @@ retry_peek:
+@@ -451,7 +451,7 @@ retry_peek:
  
  		if (errno != EAGAIN) {
  			final_rc = -errno;
@@ -106,7 +88,7 @@ index 68ff5e5..96c1c18 100644
  			if (errno == ECONNRESET || errno == EPIPE) {
  				final_rc = -ENOTCONN;
  			}
-@@ -685,7 +685,7 @@ _sock_rm_from_mainloop(struct qb_ipcs_connection *c)
+@@ -686,7 +686,7 @@ _sock_rm_from_mainloop(struct qb_ipcs_connection *c)
  static void
  qb_ipcs_us_disconnect(struct qb_ipcs_connection *c)
  {
@@ -115,7 +97,7 @@ index 68ff5e5..96c1c18 100644
  	struct sockaddr_un un_addr;
  	socklen_t un_addr_len = sizeof(struct sockaddr_un);
  	char *base_name;
-@@ -698,7 +698,7 @@ qb_ipcs_us_disconnect(struct qb_ipcs_connection *c)
+@@ -699,7 +699,7 @@ qb_ipcs_us_disconnect(struct qb_ipcs_connection *c)
  	    c->state == QB_IPCS_CONNECTION_ACTIVE) {
  		_sock_rm_from_mainloop(c);
  
@@ -124,24 +106,8 @@ index 68ff5e5..96c1c18 100644
  		if (getsockname(c->response.u.us.sock, (struct sockaddr *)&un_addr, &un_addr_len) == 0) {
  			length = strlen(un_addr.sun_path);
  			base_name = strndup(un_addr.sun_path,length-8);
-diff --git a/lib/log_thread.c b/lib/log_thread.c
-index 56008f8..930fb33 100644
---- a/lib/log_thread.c
-+++ b/lib/log_thread.c
-@@ -164,7 +164,11 @@ qb_log_thread_start(void)
- 
- 	if (logt_sched_param_queued) {
- 		res = qb_log_thread_priority_set(logt_sched_policy,
-+#if defined(HAVE_PTHREAD_SETSCHEDPARAM) && defined(HAVE_SCHED_GET_PRIORITY_MAX)
- 		                                 logt_sched_param.sched_priority);
-+#else
-+		                                 0);
-+#endif
- 		if (res != 0) {
- 			goto cleanup_pthread;
- 		}
 diff --git a/lib/unix.c b/lib/unix.c
-index 44389d2..59a1ce2 100644
+index 3c8f327..c31145e 100644
 --- a/lib/unix.c
 +++ b/lib/unix.c
 @@ -80,7 +80,7 @@ qb_sys_mmap_file_open(char *path, const char *file, size_t bytes,

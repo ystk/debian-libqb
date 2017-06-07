@@ -1,0 +1,57 @@
+From: =?utf-8?q?Ferenc_W=C3=A1gner?= <wferi@debian.org>
+Date: Mon, 5 Dec 2016 23:01:49 +0100
+Subject: Restrict socket lib to where it's actually needed
+
+---
+ configure.ac         | 5 ++++-
+ examples/Makefile.am | 4 ++--
+ lib/Makefile.am      | 2 +-
+ 3 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 65b71d0..9c9895d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -107,7 +107,10 @@ AX_SAVE_FLAGS
+ AC_SEARCH_LIBS([dlopen],[dl],,[AC_MSG_ERROR([cannot find dlopen() function])])
+ AC_SUBST([dlopen_LIBS],[$LIBS])
+ AX_RESTORE_FLAGS
+-AC_SEARCH_LIBS([socket], [socket])
++AX_SAVE_FLAGS
++AC_SEARCH_LIBS([socket], [socket],,[AC_MSG_ERROR([cannot find socket() function])])
++AC_SUBST([socket_LIBS],[$LIBS])
++AX_RESTORE_FLAGS
+ AC_SEARCH_LIBS([gethostbyname], [nsl])
+ 
+ # look for testing harness "check"
+diff --git a/examples/Makefile.am b/examples/Makefile.am
+index d546fca..3ba95fb 100644
+--- a/examples/Makefile.am
++++ b/examples/Makefile.am
+@@ -33,11 +33,11 @@ simplelog_LDADD = $(top_builddir)/lib/libqb.la
+ 
+ tcpclient_SOURCES = tcpclient.c $(top_builddir)/include/qb/qbloop.h
+ tcpclient_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include
+-tcpclient_LDADD = $(top_builddir)/lib/libqb.la
++tcpclient_LDADD = $(top_builddir)/lib/libqb.la $(socket_LIBS)
+ 
+ tcpserver_SOURCES = tcpserver.c $(top_builddir)/include/qb/qbloop.h
+ tcpserver_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include
+-tcpserver_LDADD = $(top_builddir)/lib/libqb.la
++tcpserver_LDADD = $(top_builddir)/lib/libqb.la $(socket_LIBS)
+ 
+ ipcclient_SOURCES = ipcclient.c $(top_builddir)/include/qb/qbloop.h \
+ 		    $(top_builddir)/include/qb/qbipcc.h
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 0e7b0dc..b372628 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -41,7 +41,7 @@ source_to_lint		= util.c hdb.c ringbuffer.c ringbuffer_helper.c \
+ 
+ libqb_la_SOURCES	= $(source_to_lint) unix.c
+ libqb_la_CFLAGS		= $(PTHREAD_CFLAGS)
+-libqb_la_LIBADD		= $(LTLIBOBJS) $(dlopen_LIBS) $(PTHREAD_LIBS)
++libqb_la_LIBADD		= $(LTLIBOBJS) $(dlopen_LIBS) $(PTHREAD_LIBS) $(socket_LIBS)
+ 
+ AM_LDFLAGS 	= $(LDFLAGS_COPY:-Bsymbolic-functions=)
+ 

@@ -1,4 +1,4 @@
-.TH "qblog.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.TH "qblog.h" 3 "Thu Nov 24 2016" "Version 1.0.1" "libqb" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -50,6 +50,24 @@ The logging API provides four main parts (basics, filtering, threading & blackbo
 .br
 .ti -1c
 .RI "#define \fBQB_LOG_STRERROR_MAX_LEN\fP   128"
+.br
+.ti -1c
+.RI "#define \fBQB_ATTR_SECTION\fP   __verbose  /* conforms to C ident\&. */"
+.br
+.ti -1c
+.RI "#define \fBQB_ATTR_SECTION_STR\fP   \fBQB_PP_STRINGIFY\fP(\fBQB_ATTR_SECTION\fP)"
+.br
+.ti -1c
+.RI "#define \fBQB_ATTR_SECTION_START\fP   \fBQB_PP_JOIN\fP(__start_, \fBQB_ATTR_SECTION\fP)"
+.br
+.ti -1c
+.RI "#define \fBQB_ATTR_SECTION_STOP\fP   \fBQB_PP_JOIN\fP(__stop_, \fBQB_ATTR_SECTION\fP)"
+.br
+.ti -1c
+.RI "#define \fBQB_ATTR_SECTION_START_STR\fP   \fBQB_PP_STRINGIFY\fP(\fBQB_ATTR_SECTION_START\fP)"
+.br
+.ti -1c
+.RI "#define \fBQB_ATTR_SECTION_STOP_STR\fP   \fBQB_PP_STRINGIFY\fP(\fBQB_ATTR_SECTION_STOP\fP)"
 .br
 .ti -1c
 .RI "#define \fBQB_LOG_INIT_DATA\fP(name)"
@@ -278,10 +296,10 @@ The logging API provides four main parts (basics, filtering, threading & blackbo
 .RI "uint32_t \fBtags\fP"
 .br
 .ti -1c
-.RI "struct \fBqb_log_callsite\fP \fB__start___verbose\fP []"
+.RI "struct \fBqb_log_callsite\fP \fBQB_ATTR_SECTION_START\fP []"
 .br
 .ti -1c
-.RI "struct \fBqb_log_callsite\fP \fB__stop___verbose\fP []"
+.RI "struct \fBqb_log_callsite\fP \fBQB_ATTR_SECTION_STOP\fP []"
 .br
 .ti -1c
 .RI "enum \fBqb_log_target_slot\fP \fB__attribute__\fP"
@@ -418,7 +436,7 @@ So to make all logs with the substring 'ringbuffer' go to stderr, do the followi
 .PP
 \fBThread safe non-blocking logging\&.\fP
 .RS 4
-Logging is only thread safe when threaded logging is in use\&. If you plan on logging from multiple threads, you must initialize libqb's logger thread and use qg_log_filter_ctl to set the QB_LOG_CONF_THREADED flag on all the logging targets in use\&.
+Logging is only thread safe when threaded logging is in use\&. If you plan on logging from multiple threads, you must initialize libqb's logger thread and use qb_log_filter_ctl to set the QB_LOG_CONF_THREADED flag on all the logging targets in use\&.
 .RE
 .PP
 To achieve non-blocking logging, so that any calls to write() or syslog() will not hold up your program, you can use threaded logging as well\&.
@@ -526,6 +544,18 @@ You can tag messages using the second argument to \fBqb_logt()\fP or by using \f
 .PP 
 .SS "#define LOG_TRACE   (LOG_DEBUG + 1)"
 
+.SS "#define QB_ATTR_SECTION   __verbose  /* conforms to C ident\&. */"
+
+.SS "#define QB_ATTR_SECTION_START   \fBQB_PP_JOIN\fP(__start_, \fBQB_ATTR_SECTION\fP)"
+
+.SS "#define QB_ATTR_SECTION_START_STR   \fBQB_PP_STRINGIFY\fP(\fBQB_ATTR_SECTION_START\fP)"
+
+.SS "#define QB_ATTR_SECTION_STOP   \fBQB_PP_JOIN\fP(__stop_, \fBQB_ATTR_SECTION\fP)"
+
+.SS "#define QB_ATTR_SECTION_STOP_STR   \fBQB_PP_STRINGIFY\fP(\fBQB_ATTR_SECTION_STOP\fP)"
+
+.SS "#define QB_ATTR_SECTION_STR   \fBQB_PP_STRINGIFY\fP(\fBQB_ATTR_SECTION\fP)"
+
 .SS "#define qb_enter()   \fBqb_log\fP(\fBLOG_TRACE\fP, 'ENTERING %s()', __func__)"
 
 .SS "#define qb_leave()   \fBqb_log\fP(\fBLOG_TRACE\fP, 'LEAVING %s()', __func__)"
@@ -553,8 +583,9 @@ This is the main function to generate a log message\&.
 \fBValue:\fP
 .PP
 .nf
-void name(void);                                                     \
-    void name(void) { if (__start___verbose != __stop___verbose) {assert(1);} } \
+void name(void);                                                         \
+    void name(void)                                                             \
+    { if (QB_ATTR_SECTION_START == QB_ATTR_SECTION_STOP) assert(0); }   \
     void __attribute__ ((constructor)) name(void);
 .fi
 .SS "#define QB_LOG_MAX_LEN   512"
@@ -571,7 +602,7 @@ void name(void);                                                     \
 .nf
 do {                  \
         static struct qb_log_callsite descriptor                        \
-        __attribute__((section("__verbose"), aligned(8))) =             \
+        __attribute__((section(QB_ATTR_SECTION_STR), aligned(8))) =     \
         { __func__, __FILE__, fmt, priority, __LINE__, 0, tags };       \\
 	qb_log_real_(&descriptor, ##args);                             \
     } while(0)
@@ -781,8 +812,8 @@ Dump the callsite info to stdout\&.
 If you are using dynamically loadable modules via dlopen() and you load them after \fBqb_log_init()\fP then after you load the module you will need to do the following to get the filters to work in that module: 
 .PP
 .nf
-*       _start = dlsym (dl_handle, "__start___verbose");
-*       _stop = dlsym (dl_handle, "__stop___verbose");
+*       _start = dlsym (dl_handle, QB_ATTR_SECTION_START_STR);
+*       _stop = dlsym (dl_handle, QB_ATTR_SECTION_STOP_STR);
 *       qb_log_callsites_register(_start, _stop);
 * 
 
@@ -1021,10 +1052,6 @@ Start the logging pthread\&.
 .PP 
 .SS "enum \fBqb_log_target_slot\fP  __attribute__"
 
-.SS "struct \fBqb_log_callsite\fP __start___verbose[]"
-
-.SS "struct \fBqb_log_callsite\fP __stop___verbose[]"
-
 .SS "const char* filename"
 
 .SS "const char* format"
@@ -1034,6 +1061,10 @@ Start the logging pthread\&.
 .SS "uint32_t lineno"
 
 .SS "uint8_t priority"
+
+.SS "struct \fBqb_log_callsite\fP QB_ATTR_SECTION_START[]"
+
+.SS "struct \fBqb_log_callsite\fP QB_ATTR_SECTION_STOP[]"
 
 .SS "uint32_t tags"
 

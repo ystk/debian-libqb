@@ -23,10 +23,26 @@
 #ifndef QB_CONFIG_H_DEFINED
 #define QB_CONFIG_H_DEFINED
 
+#include <qb/qbdefs.h>  /* QB_PP_STRINGIFY */
+
 /* need atomic memory barrier */
 #define QB_ATOMIC_OP_MEMORY_BARRIER_NEEDED 1
 
 /* Enabling code using __attribute__((section)) */
 #define QB_HAVE_ATTRIBUTE_SECTION 1
+
+/* versioning info: MAJOR, MINOR, MICRO, and REST components */
+#define QB_VER_MAJOR 1
+#define QB_VER_MINOR 0
+#define QB_VER_MICRO 1
+#define QB_VER_REST ""
+
+#define QB_VER_STR   \
+	QB_PP_STRINGIFY(QB_VER_MAJOR) \
+	"." \
+	QB_PP_STRINGIFY(QB_VER_MINOR) \
+	"." \
+	QB_PP_STRINGIFY(QB_VER_MICRO) \
+	QB_VER_REST
 
 #endif /* QB_CONFIG_H_DEFINED */
