@@ -1,4 +1,4 @@
-.TH "qbipcs.h" 3 "Fri Apr 1 2016" "Version 1.0" "libqb" \" -*- nroff -*-
+.TH "qbipcs.h" 3 "Thu Nov 24 2016" "Version 1.0.1" "libqb" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,13 +9,11 @@ Server IPC API\&.
 .SH SYNOPSIS
 .br
 .PP
-\fC#include <stdlib\&.h>\fP
+\fC#include <sys/types\&.h>\fP
 .br
 \fC#include <sys/uio\&.h>\fP
 .br
 \fC#include <qb/qbipc_common\&.h>\fP
-.br
-\fC#include <qb/qbhdb\&.h>\fP
 .br
 \fC#include <qb/qbloop\&.h>\fP
 .br
@@ -141,11 +139,11 @@ Server IPC API\&.
 .ti -1c
 .RI "ssize_t \fBqb_ipcs_event_send\fP (\fBqb_ipcs_connection_t\fP *c, const void *data, size_t size)"
 .br
-.RI "\fISend an asyncronous event message to the client\&. \fP"
+.RI "\fISend an asynchronous event message to the client\&. \fP"
 .ti -1c
 .RI "ssize_t \fBqb_ipcs_event_sendv\fP (\fBqb_ipcs_connection_t\fP *c, const struct iovec *iov, size_t iov_len)"
 .br
-.RI "\fISend an asyncronous event message to the client\&. \fP"
+.RI "\fISend an asynchronous event message to the client\&. \fP"
 .ti -1c
 .RI "void \fBqb_ipcs_connection_ref\fP (\fBqb_ipcs_connection_t\fP *c)"
 .br
@@ -217,7 +215,7 @@ Server IPC API\&.
 .SS "typedef int32_t(* qb_ipcs_connection_accept_fn)(\fBqb_ipcs_connection_t\fP *c, uid_t uid, gid_t gid)"
 
 .PP
-This callback is to check whether you want to accept a new connection\&. The type of checks you should do are authentication, service availabilty or process resource constraints\&. 
+This callback is to check whether you want to accept a new connection\&. The type of checks you should do are authentication, service availability or process resource constraints\&. 
 .PP
 \fBReturns:\fP
 .RS 4
@@ -576,7 +574,7 @@ Setting this will force client connections to use at least max_buf_size bytes as
 .SS "ssize_t qb_ipcs_event_send (\fBqb_ipcs_connection_t\fP *c, const void *data, size_tsize)"
 
 .PP
-Send an asyncronous event message to the client\&. 
+Send an asynchronous event message to the client\&. 
 .PP
 \fBParameters:\fP
 .RS 4
@@ -603,7 +601,7 @@ When send returns -EMSGSIZE, this means the msg is too large and will never succ
 .SS "ssize_t qb_ipcs_event_sendv (\fBqb_ipcs_connection_t\fP *c, const struct iovec *iov, size_tiov_len)"
 
 .PP
-Send an asyncronous event message to the client\&. 
+Send an asynchronous event message to the client\&. 
 .PP
 \fBParameters:\fP
 .RS 4

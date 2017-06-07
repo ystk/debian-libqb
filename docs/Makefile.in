@@ -327,7 +327,7 @@ dist_man_MANS = man8/qb-blackbox.8
 @HAVE_DOXYGEN_TRUE@inc_dir = $(top_srcdir)/include/qb
 @HAVE_DOXYGEN_TRUE@public_headers = $(sort $(patsubst %.in,%,$(subst $(inc_dir)/,,$(shell \
 @HAVE_DOXYGEN_TRUE@	printf 'include $(inc_dir)/Makefile.am\n\n%%.var:\n\t@echo $$($$*)' \
-@HAVE_DOXYGEN_TRUE@	| ${MAKE} --no-print-directory -f- inst_HEADERS.var \
+@HAVE_DOXYGEN_TRUE@	| MAKEFLAGS= ${MAKE} --no-print-directory -f- inst_HEADERS.var \
 @HAVE_DOXYGEN_TRUE@	|| echo $(inc_dir)/qb*.h*))))
 
 @HAVE_DOXYGEN_TRUE@public_headers_omit = qbconfig.h
