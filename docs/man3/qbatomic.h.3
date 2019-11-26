@@ -1,0 +1,283 @@
+.TH "qbatomic.h" 3 "Sun Mar 11 2012" "Version 0.11.1" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbatomic.h \- 
+.PP
+Basic atomic integer and pointer operations\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <qb/qbdefs\&.h>\fP
+.br
+\fC#include <qb/qbconfig\&.h>\fP
+.br
+
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBqb_atomic_int_get\fP(atomic)"
+.br
+.ti -1c
+.RI "#define \fBqb_atomic_int_set\fP(atomic, newval)"
+.br
+.ti -1c
+.RI "#define \fBqb_atomic_pointer_get\fP(atomic)"
+.br
+.ti -1c
+.RI "#define \fBqb_atomic_pointer_set\fP(atomic, newval)"
+.br
+.ti -1c
+.RI "#define \fBqb_atomic_int_inc\fP(atomic)   (\fBqb_atomic_int_add\fP ((atomic), 1))"
+.br
+.RI "\fIAtomically increments the integer pointed to by atomic by 1\&. \fP"
+.ti -1c
+.RI "#define \fBqb_atomic_int_dec_and_test\fP(atomic)   (\fBqb_atomic_int_exchange_and_add\fP ((atomic), -1) == 1)"
+.br
+.RI "\fIAtomically decrements the integer pointed to by atomic by 1\&. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBqb_atomic_init\fP (void)"
+.br
+.ti -1c
+.RI "int32_t \fBqb_atomic_int_exchange_and_add\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_t val)"
+.br
+.RI "\fIAtomically adds val to the integer pointed to by atomic\&. \fP"
+.ti -1c
+.RI "void \fBqb_atomic_int_add\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_t val)"
+.br
+.RI "\fIAtomically adds val to the integer pointed to by atomic\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_atomic_int_compare_and_exchange\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_t oldval, int32_t newval)"
+.br
+.RI "\fICompares oldval with the integer pointed to by atomic and if they are equal, atomically exchanges *atomic with newval\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_atomic_pointer_compare_and_exchange\fP (volatile void *\fBQB_GNUC_MAY_ALIAS\fP *atomic, void *oldval, void *newval)"
+.br
+.RI "\fICompares oldval with the pointer pointed to by atomic and if they are equal, atomically exchanges *atomic with newval\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_atomic_int_get\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic)"
+.br
+.RI "\fIReads the value of the integer pointed to by atomic\&. \fP"
+.ti -1c
+.RI "void \fBqb_atomic_int_set\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_t newval)"
+.br
+.RI "\fISets the value of the integer pointed to by atomic\&. \fP"
+.ti -1c
+.RI "void * \fBqb_atomic_pointer_get\fP (volatile void *\fBQB_GNUC_MAY_ALIAS\fP *atomic)"
+.br
+.RI "\fIReads the value of the pointer pointed to by atomic\&. \fP"
+.ti -1c
+.RI "void \fBqb_atomic_pointer_set\fP (volatile void *\fBQB_GNUC_MAY_ALIAS\fP *atomic, void *newval)"
+.br
+.RI "\fISets the value of the pointer pointed to by atomic\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Basic atomic integer and pointer operations\&. 
+
+The following functions can be used to atomically access integers and pointers\&. They are implemented as inline assembler function on most platforms and use slower fall-backs otherwise\&. Using them can sometimes save you from using a performance-expensive pthread_mutex to protect the integer or pointer\&.
+.PP
+The most important usage is reference counting\&. Using \fBqb_atomic_int_inc()\fP and \fBqb_atomic_int_dec_and_test()\fP makes reference counting a very fast operation\&.
+.PP
+You must not directly read integers or pointers concurrently accessed by multiple threads, but use the atomic accessor functions instead\&. That is, always use \fBqb_atomic_int_get()\fP and \fBqb_atomic_pointer_get()\fP for read outs\&. They provide the neccessary synchonization mechanisms like memory barriers to access memory locations concurrently\&.
+.PP
+If you are using those functions for anything apart from simple reference counting, you should really be aware of the implications of doing that\&. There are literally thousands of ways to shoot yourself in the foot\&. So if in doubt, use a pthread_mutex\&. If you don't know, what memory barriers are, do not use anything but \fBqb_atomic_int_inc()\fP and \fBqb_atomic_int_dec_and_test()\fP\&.
+.PP
+It is not safe to set an integer or pointer just by assigning to it, when it is concurrently accessed by other threads with the following functions\&. Use \fBqb_atomic_int_compare_and_exchange()\fP or \fBqb_atomic_pointer_compare_and_exchange()\fP respectively\&. 
+.SH "Define Documentation"
+.PP 
+.SS "#define \fBqb_atomic_int_dec_and_test\fP(atomic)   (\fBqb_atomic_int_exchange_and_add\fP ((atomic), -1) == 1)"
+
+.PP
+Atomically decrements the integer pointed to by atomic by 1\&. \fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+QB_TRUE if the integer pointed to by atomic is 0 after decrementing it 
+.RE
+.PP
+
+.SS "#define \fBqb_atomic_int_get\fP(atomic)"
+\fBValue:\fP
+.PP
+.nf
+((void) sizeof (char* [sizeof (*(atomic)) == sizeof (int32_t) ? 1 : -1]), \
+  (qb_atomic_int_get) ((volatile int32_t QB_GNUC_MAY_ALIAS *) (volatile void *) (atomic)))
+.fi
+.SS "#define \fBqb_atomic_int_inc\fP(atomic)   (\fBqb_atomic_int_add\fP ((atomic), 1))"
+
+.PP
+Atomically increments the integer pointed to by atomic by 1\&. \fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer\&. 
+.RE
+.PP
+
+.SS "#define \fBqb_atomic_int_set\fP(atomic, newval)"
+\fBValue:\fP
+.PP
+.nf
+((void) sizeof (char* [sizeof (*(atomic)) == sizeof (int32_t) ? 1 : -1]), \
+  (qb_atomic_int_set) ((volatile int32_t QB_GNUC_MAY_ALIAS *) (volatile void *) (atomic), (newval)))
+.fi
+.SS "#define \fBqb_atomic_pointer_get\fP(atomic)"
+\fBValue:\fP
+.PP
+.nf
+((void) sizeof (char* [sizeof (*(atomic)) == sizeof (void*) ? 1 : -1]), \
+  (qb_atomic_pointer_get) ((volatile void* QB_GNUC_MAY_ALIAS *) (volatile void *) (atomic)))
+.fi
+.SS "#define \fBqb_atomic_pointer_set\fP(atomic, newval)"
+\fBValue:\fP
+.PP
+.nf
+((void) sizeof (char* [sizeof (*(atomic)) == sizeof (void*) ? 1 : -1]), \
+  (qb_atomic_pointer_set) ((volatile void* QB_GNUC_MAY_ALIAS *) (volatile void *) (atomic), (newval)))
+.fi
+.SH "Function Documentation"
+.PP 
+.SS "void \fBqb_atomic_init\fP (void)"
+
+.SS "void \fBqb_atomic_int_add\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_tval)"
+
+.PP
+Atomically adds val to the integer pointed to by atomic\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer 
+.br
+\fIval\fP the value to add to *atomic 
+.RE
+.PP
+
+.SS "int32_t \fBqb_atomic_int_compare_and_exchange\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_toldval, int32_tnewval)"
+
+.PP
+Compares oldval with the integer pointed to by atomic and if they are equal, atomically exchanges *atomic with newval\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer 
+.br
+\fIoldval\fP the assumed old value of *atomic 
+.br
+\fInewval\fP the new value of *atomic
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+QB_TRUE, if *atomic was equal oldval\&. QB_FALSE otherwise\&. 
+.RE
+.PP
+
+.SS "int32_t \fBqb_atomic_int_exchange_and_add\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_tval)"
+
+.PP
+Atomically adds val to the integer pointed to by atomic\&. It returns the value of *atomic just before the addition took place\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer 
+.br
+\fIval\fP the value to add to *atomic 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the value of *atomic before the addition\&. 
+.RE
+.PP
+
+.SS "int32_t \fBqb_atomic_int_get\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic)"
+
+.PP
+Reads the value of the integer pointed to by atomic\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the value of atomic 
+.RE
+.PP
+
+.SS "void \fBqb_atomic_int_set\fP (volatile int32_t \fBQB_GNUC_MAY_ALIAS\fP *atomic, int32_tnewval)"
+
+.PP
+Sets the value of the integer pointed to by atomic\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to an integer 
+.br
+\fInewval\fP the new value 
+.RE
+.PP
+
+.SS "int32_t \fBqb_atomic_pointer_compare_and_exchange\fP (volatile void *\fBQB_GNUC_MAY_ALIAS\fP *atomic, void *oldval, void *newval)"
+
+.PP
+Compares oldval with the pointer pointed to by atomic and if they are equal, atomically exchanges *atomic with newval\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to a void* 
+.br
+\fIoldval\fP the assumed old value of *atomic 
+.br
+\fInewval\fP the new value of *atomic
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+QB_TRUE if atomic was equal oldval, else QB_FALSE\&. 
+.RE
+.PP
+
+.SS "void* \fBqb_atomic_pointer_get\fP (volatile void *\fBQB_GNUC_MAY_ALIAS\fP *atomic)"
+
+.PP
+Reads the value of the pointer pointed to by atomic\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to a void*\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the value to add to atomic\&. 
+.RE
+.PP
+
+.SS "void \fBqb_atomic_pointer_set\fP (volatile void *\fBQB_GNUC_MAY_ALIAS\fP *atomic, void *newval)"
+
+.PP
+Sets the value of the pointer pointed to by atomic\&. Also acts as a memory barrier\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIatomic\fP a pointer to a void* 
+.br
+\fInewval\fP the new value 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

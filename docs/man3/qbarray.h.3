@@ -1,0 +1,170 @@
+.TH "qbarray.h" 3 "Sun Mar 11 2012" "Version 0.11.1" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbarray.h \- 
+.PP
+This is a dynamic array (it can grow, but without moving memory)\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <unistd\&.h>\fP
+.br
+\fC#include <qb/qbdefs\&.h>\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct qb_array \fBqb_array_t\fP"
+.br
+.RI "\fIThis is an opaque data type representing an instance of an array\&. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBqb_array_t\fP * \fBqb_array_create\fP (size_t max_elements, size_t element_size)"
+.br
+.RI "\fICreate an array with fixed sized elements\&. \fP"
+.ti -1c
+.RI "\fBqb_array_t\fP * \fBqb_array_create_2\fP (size_t max_elements, size_t element_size, size_t autogrow_elements)"
+.br
+.RI "\fICreate an array with fixed sized elements\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_array_index\fP (\fBqb_array_t\fP *a, int32_t idx, void **element_out)"
+.br
+.RI "\fIGet an element at a particular index\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_array_grow\fP (\fBqb_array_t\fP *a, size_t max_elements)"
+.br
+.RI "\fIGrow the array\&. \fP"
+.ti -1c
+.RI "size_t \fBqb_array_num_bins_get\fP (\fBqb_array_t\fP *a)"
+.br
+.RI "\fIGet the number of bins used or the array\&. \fP"
+.ti -1c
+.RI "size_t \fBqb_array_elems_per_bin_get\fP (\fBqb_array_t\fP *a)"
+.br
+.RI "\fIGet the number of elements per bin\&. \fP"
+.ti -1c
+.RI "void \fBqb_array_free\fP (\fBqb_array_t\fP *a)"
+.br
+.RI "\fIFree all the memory used by the array\&. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+This is a dynamic array (it can grow, but without moving memory)\&. 
+
+.PP
+.nf
+ arr = qb_array_create_2(64, sizeof(struct my_struct), 256);
+ \&.\&.\&.
+ res = qb_array_index(arr, idx, (void**)&my_ptr);
+ if (res < 0) {
+        return res;
+ }
+ // use my_ptr, now even if there is a grow, this pointer will be valid\&.
+.fi
+.PP
+ 
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef struct qb_array \fBqb_array_t\fP"
+
+.PP
+This is an opaque data type representing an instance of an array\&. 
+.SH "Function Documentation"
+.PP 
+.SS "\fBqb_array_t\fP* \fBqb_array_create\fP (size_tmax_elements, size_telement_size)"
+
+.PP
+Create an array with fixed sized elements\&. \fBParameters:\fP
+.RS 4
+\fImax_elements\fP initial max elements\&. 
+.br
+\fIelement_size\fP size of each element\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+array instance\&. 
+.RE
+.PP
+
+.SS "\fBqb_array_t\fP* \fBqb_array_create_2\fP (size_tmax_elements, size_telement_size, size_tautogrow_elements)"
+
+.PP
+Create an array with fixed sized elements\&. \fBParameters:\fP
+.RS 4
+\fImax_elements\fP initial max elements\&. 
+.br
+\fIelement_size\fP size of each element\&. 
+.br
+\fIautogrow_elements\fP the number of elements to grow automatically by\&.
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+array instance\&. 
+.RE
+.PP
+
+.SS "size_t \fBqb_array_elems_per_bin_get\fP (\fBqb_array_t\fP *a)"
+
+.PP
+Get the number of elements per bin\&. 
+.SS "void \fBqb_array_free\fP (\fBqb_array_t\fP *a)"
+
+.PP
+Free all the memory used by the array\&. \fBParameters:\fP
+.RS 4
+\fIa\fP array instance\&. 
+.RE
+.PP
+
+.SS "int32_t \fBqb_array_grow\fP (\fBqb_array_t\fP *a, size_tmax_elements)"
+
+.PP
+Grow the array\&. \fBParameters:\fP
+.RS 4
+\fIa\fP array instance\&. 
+.br
+\fImax_elements\fP the new maximum size of the array\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == success, else -errno) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_array_index\fP (\fBqb_array_t\fP *a, int32_tidx, void **element_out)"
+
+.PP
+Get an element at a particular index\&. \fBParameters:\fP
+.RS 4
+\fIa\fP array instance\&. 
+.br
+\fIidx\fP the index 
+.br
+\fIelement_out\fP the pointer to the element data\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == success, else -errno) 
+.RE
+.PP
+
+.SS "size_t \fBqb_array_num_bins_get\fP (\fBqb_array_t\fP *a)"
+
+.PP
+Get the number of bins used or the array\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

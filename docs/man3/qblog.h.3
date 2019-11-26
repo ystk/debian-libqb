@@ -1,0 +1,918 @@
+.TH "qblog.h" 3 "Sun Mar 11 2012" "Version 0.11.1" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qblog.h \- 
+.PP
+The logging API provides four main parts (basics, filtering, threading & blackbox)\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <stdlib\&.h>\fP
+.br
+\fC#include <stdio\&.h>\fP
+.br
+\fC#include <stdarg\&.h>\fP
+.br
+\fC#include <errno\&.h>\fP
+.br
+\fC#include <syslog\&.h>\fP
+.br
+\fC#include <string\&.h>\fP
+.br
+\fC#include <qb/qbutil\&.h>\fP
+.br
+\fC#include <qb/qbconfig\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBqb_log_callsite\fP"
+.br
+.RI "\fIAn instance of this structure is created in a special ELF section at every dynamic debug callsite\&. \fP"
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBLOG_TRACE\fP   (LOG_DEBUG + 1)"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_MAX_LEN\fP   512"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_STRERROR_MAX_LEN\fP   128"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_INIT_DATA\fP(name)"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_TAG_LIBQB_MSG_BIT\fP   31"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_TAG_LIBQB_MSG\fP   (1 << \fBQB_LOG_TAG_LIBQB_MSG_BIT\fP)"
+.br
+.ti -1c
+.RI "#define \fBqb_logt\fP(\fBpriority\fP, \fBtags\fP, fmt, args\&.\&.\&.)"
+.br
+.RI "\fIThis is the function to generate a log message if you want to manually add tags\&. \fP"
+.ti -1c
+.RI "#define \fBqb_log\fP(\fBpriority\fP, fmt, args\&.\&.\&.)   \fBqb_logt\fP(\fBpriority\fP, 0, fmt, ##args)"
+.br
+.RI "\fIThis is the main function to generate a log message\&. \fP"
+.ti -1c
+.RI "#define \fBqb_perror\fP(\fBpriority\fP, fmt, args\&.\&.\&.)"
+.br
+.RI "\fIThis is similar to perror except it goes into the logging system\&. \fP"
+.ti -1c
+.RI "#define \fBqb_enter\fP()   \fBqb_log\fP(\fBLOG_TRACE\fP, 'ENTERING %s()', __func__)"
+.br
+.ti -1c
+.RI "#define \fBqb_leave\fP()   \fBqb_log\fP(\fBLOG_TRACE\fP, 'LEAVING %s()', __func__)"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_SYSLOG\fP   0"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_STDERR\fP   1"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_BLACKBOX\fP   2"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_STDOUT\fP   3"
+.br
+.ti -1c
+.RI "#define \fBQB_LOG_TARGET_MAX\fP   32"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef const char *(* \fBqb_log_tags_stringify_fn\fP )(uint32_t \fBtags\fP)"
+.br
+.ti -1c
+.RI "typedef void(* \fBqb_log_filter_fn\fP )(struct \fBqb_log_callsite\fP *cs)"
+.br
+.ti -1c
+.RI "typedef void(* \fBqb_log_logger_fn\fP )(int32_t t, struct \fBqb_log_callsite\fP *cs, time_t timestamp, const char *msg)"
+.br
+.ti -1c
+.RI "typedef void(* \fBqb_log_vlogger_fn\fP )(int32_t t, struct \fBqb_log_callsite\fP *cs, time_t timestamp, va_list ap)"
+.br
+.ti -1c
+.RI "typedef void(* \fBqb_log_close_fn\fP )(int32_t t)"
+.br
+.ti -1c
+.RI "typedef void(* \fBqb_log_reload_fn\fP )(int32_t t)"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBqb_log_target_state\fP { \fBQB_LOG_STATE_UNUSED\fP =  1, \fBQB_LOG_STATE_DISABLED\fP =  2, \fBQB_LOG_STATE_ENABLED\fP =  3 }"
+.br
+.ti -1c
+.RI "enum \fBqb_log_conf\fP { \fBQB_LOG_CONF_ENABLED\fP, \fBQB_LOG_CONF_FACILITY\fP, \fBQB_LOG_CONF_DEBUG\fP, \fBQB_LOG_CONF_SIZE\fP, \fBQB_LOG_CONF_THREADED\fP, \fBQB_LOG_CONF_PRIORITY_BUMP\fP, \fBQB_LOG_CONF_STATE_GET\fP }"
+.br
+.ti -1c
+.RI "enum \fBqb_log_filter_type\fP { \fBQB_LOG_FILTER_FILE\fP, \fBQB_LOG_FILTER_FUNCTION\fP, \fBQB_LOG_FILTER_FORMAT\fP }"
+.br
+.ti -1c
+.RI "enum \fBqb_log_filter_conf\fP { \fBQB_LOG_FILTER_ADD\fP, \fBQB_LOG_FILTER_REMOVE\fP, \fBQB_LOG_FILTER_CLEAR_ALL\fP, \fBQB_LOG_TAG_SET\fP, \fBQB_LOG_TAG_CLEAR\fP, \fBQB_LOG_TAG_CLEAR_ALL\fP }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "struct \fBqb_log_callsite\fP \fB__attribute__\fP ((aligned(8)))"
+.br
+.ti -1c
+.RI "void \fBqb_log_real_\fP (struct \fBqb_log_callsite\fP *cs,\&.\&.\&.)"
+.br
+.RI "\fIInternal function: use \fBqb_log()\fP or \fBqb_logt()\fP \fP"
+.ti -1c
+.RI "void \fBqb_log_real_va_\fP (struct \fBqb_log_callsite\fP *cs, va_list ap)"
+.br
+.ti -1c
+.RI "void \fBqb_log_from_external_source\fP (const char *\fBfunction\fP, const char *\fBfilename\fP, const char *\fBformat\fP, uint8_t \fBpriority\fP, uint32_t \fBlineno\fP, uint32_t \fBtags\fP,\&.\&.\&.)"
+.br
+.RI "\fIThis function is to import logs from other code (like libraries) that provide a callback with their logs\&. \fP"
+.ti -1c
+.RI "struct \fBqb_log_callsite\fP * \fBqb_log_callsite_get\fP (const char *\fBfunction\fP, const char *\fBfilename\fP, const char *\fBformat\fP, uint8_t \fBpriority\fP, uint32_t \fBlineno\fP, uint32_t \fBtags\fP)"
+.br
+.RI "\fIGet or create a callsite at the give position\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_from_external_source_va\fP (const char *\fBfunction\fP, const char *\fBfilename\fP, const char *\fBformat\fP, uint8_t \fBpriority\fP, uint32_t \fBlineno\fP, uint32_t \fBtags\fP, va_list ap)"
+.br
+.ti -1c
+.RI "void \fBqb_log_init\fP (const char *name, int32_t facility, uint8_t \fBpriority\fP)"
+.br
+.RI "\fIInit the logging system\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_fini\fP (void)"
+.br
+.RI "\fILogging system finalization function\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_callsites_register\fP (struct \fBqb_log_callsite\fP *_start, struct \fBqb_log_callsite\fP *_stop)"
+.br
+.RI "\fIIf you are using dynamically loadable modules via dlopen() and you load them after \fBqb_log_init()\fP then after you load the module you will need to do the following to get the filters to work in that module\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_callsites_dump\fP (void)"
+.br
+.RI "\fIDump the callsite info to stdout\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_ctl\fP (int32_t target, enum \fBqb_log_conf\fP conf_type, int32_t arg)"
+.br
+.RI "\fIMain logging control function\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_filter_ctl\fP (int32_t value, enum \fBqb_log_filter_conf\fP c, enum \fBqb_log_filter_type\fP type, const char *text, uint8_t low_priority)"
+.br
+.RI "\fIThis allows you modify the 'tags' and 'targets' callsite fields at runtime\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_filter_ctl2\fP (int32_t value, enum \fBqb_log_filter_conf\fP c, enum \fBqb_log_filter_type\fP type, const char *text, uint8_t high_priority, uint8_t low_priority)"
+.br
+.RI "\fIThis extends \fBqb_log_filter_ctl()\fP by been able to provide a high_priority\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_filter_fn_set\fP (\fBqb_log_filter_fn\fP fn)"
+.br
+.RI "\fIInstead of using the \fBqb_log_filter_ctl()\fP functions you can apply the filters manually by defining a callback and setting the targets field using \fBqb_bit_set()\fP and \fBqb_bit_clear()\fP like the following below\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_tags_stringify_fn_set\fP (\fBqb_log_tags_stringify_fn\fP fn)"
+.br
+.RI "\fISet the callback to map the 'tags' bit map to a string\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_format_set\fP (int32_t t, const char *\fBformat\fP)"
+.br
+.RI "\fISet the format specifiers\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_file_open\fP (const char *\fBfilename\fP)"
+.br
+.RI "\fIOpen a log file\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_file_close\fP (int32_t t)"
+.br
+.RI "\fIClose a log file and release is resources\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_thread_priority_set\fP (int32_t policy, int32_t \fBpriority\fP)"
+.br
+.RI "\fIWhen using threaded logging set the pthread policy and priority\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_thread_start\fP (void)"
+.br
+.RI "\fIStart the logging pthread\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_log_blackbox_write_to_file\fP (const char *\fBfilename\fP)"
+.br
+.RI "\fIWrite the blackbox to file\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_blackbox_print_from_file\fP (const char *\fBfilename\fP)"
+.br
+.RI "\fIRead the blackbox for file and print it out\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_custom_open\fP (\fBqb_log_logger_fn\fP log_fn, \fBqb_log_close_fn\fP close_fn, \fBqb_log_reload_fn\fP reload_fn, void *user_data)"
+.br
+.RI "\fIOpen a custom log target\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_custom_close\fP (int32_t t)"
+.br
+.RI "\fIClose a custom log target and release is resources\&. \fP"
+.ti -1c
+.RI "void * \fBqb_log_target_user_data_get\fP (int32_t t)"
+.br
+.RI "\fIRetrieve the user data set by either qb_log_custom_open or qb_log_target_user_data_set\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_target_user_data_set\fP (int32_t t, void *user_data)"
+.br
+.RI "\fIAssociate user data with this log target\&. \fP"
+.ti -1c
+.RI "void \fBqb_log_target_format\fP (int32_t target, struct \fBqb_log_callsite\fP *cs, time_t timestamp, const char *formatted_message, char *output_buffer)"
+.br
+.RI "\fIformat the callsite and timestamp info according to the format set using \fBqb_log_format_set()\fP It is intended to be used from your custom logger function\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_log_facility2int\fP (const char *fname)"
+.br
+.RI "\fIConvert string 'auth' to equivalent number 'LOG_AUTH' etc\&. \fP"
+.ti -1c
+.RI "const char * \fBqb_log_facility2str\fP (int32_t fnum)"
+.br
+.RI "\fIConvert number 'LOG_AUTH' to equivalent string 'auth' etc\&. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const char * \fBfunction\fP"
+.br
+.ti -1c
+.RI "const char * \fBfilename\fP"
+.br
+.ti -1c
+.RI "const char * \fBformat\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpriority\fP"
+.br
+.ti -1c
+.RI "uint32_t \fBlineno\fP"
+.br
+.ti -1c
+.RI "uint32_t \fBtargets\fP"
+.br
+.ti -1c
+.RI "uint32_t \fBtags\fP"
+.br
+.ti -1c
+.RI "struct \fBqb_log_callsite\fP \fB__start___verbose\fP []"
+.br
+.ti -1c
+.RI "struct \fBqb_log_callsite\fP \fB__stop___verbose\fP []"
+.br
+.ti -1c
+.RI "enum \fBqb_log_target_state\fP \fB__attribute__\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+The logging API provides four main parts (basics, filtering, threading & blackbox)\&. 
+
+The idea behind this logging system is not to be prescriptive but to provide a set of tools to help the developer achieve what they want quickly and easily\&.
+.PP
+\fBBasic logging API\&.\fP
+.RS 4
+Call \fBqb_log()\fP to generate a log message\&. Then to write the message somewhere meaningful call \fBqb_log_ctl()\fP to configure the targets\&.
+.RE
+.PP
+Simplist possible use: 
+.PP
+.nf
+ main() {
+        qb_log_init('simple-log', LOG_DAEMON, LOG_INFO);
+        // \&.\&.\&.
+        qb_log(LOG_WARNING, 'watch out');
+        // \&.\&.\&.
+        qb_log_fini();
+ }
+
+.fi
+.PP
+.PP
+\fBConfiguring log targets\&.\fP
+.RS 4
+A log target can by syslog, stderr, the blackbox or a text file\&. By default only syslog is enabled\&.
+.RE
+.PP
+To enable a target do the following 
+.PP
+.nf
+        qb_log_ctl(QB_LOG_BLACKBOX, QB_LOG_CONF_ENABLED, QB_TRUE);
+
+.fi
+.PP
+.PP
+syslog, stderr and the blackbox are static (they don't need to be created, just enabled or disabled\&. However you can open multiple logfiles (32 - QB_LOG_BLACKBOX)\&. To do this use the following code\&. 
+.PP
+.nf
+        mytarget = qb_log_file_open('/var/log/mylogfile');
+        qb_log_ctl(mytarget, QB_LOG_CONF_ENABLED, QB_TRUE);
+
+.fi
+.PP
+.PP
+Once your targets are enabled/opened you can configure them as follows: Configure the size of blackbox 
+.PP
+.nf
+        qb_log_ctl(QB_LOG_BLACKBOX, QB_LOG_CONF_SIZE, 1024*10);
+
+.fi
+.PP
+.PP
+Make logging to file threaded: 
+.PP
+.nf
+        qb_log_ctl(mytarget, QB_LOG_CONF_THREADED, QB_TRUE);
+
+.fi
+.PP
+.PP
+To workaround your syslog daemon filtering all messages > LOG_INFO 
+.PP
+.nf
+        qb_log_ctl(QB_LOG_SYSLOG, QB_LOG_CONF_PRIORITY_BUMP,
+                   LOG_INFO - LOG_DEBUG);
+
+.fi
+.PP
+.PP
+\fBFiltering messages\&.\fP
+.RS 4
+To have more power over what log messages go to which target you can apply filters to the targets\&. What happens is the desired callsites have the correct bit set\&. Then when the log message is generated it gets sent to the targets based on which bit is set in the callsite's 'target' bitmap\&. Messages can be filtered based on the:
+.IP "1." 4
+filename + priority
+.IP "2." 4
+function name + priority
+.IP "3." 4
+format string + priority
+.PP
+.RE
+.PP
+So to make all logs from evil_fnunction() go to stderr do the following: 
+.PP
+.nf
+        qb_log_filter_ctl(QB_LOG_STDERR, QB_LOG_FILTER_ADD,
+                          QB_LOG_FILTER_FUNCTION, 'evil_fnunction', LOG_TRACE);
+
+.fi
+.PP
+.PP
+So to make all logs from totem* (with a priority <= LOG_INFO) go to stderr do the following: 
+.PP
+.nf
+        qb_log_filter_ctl(QB_LOG_STDERR, QB_LOG_FILTER_ADD,
+                          QB_LOG_FILTER_FILE, 'totem', LOG_INFO);
+
+.fi
+.PP
+.PP
+So to make all logs with the substring 'ringbuffer' go to stderr do the following: 
+.PP
+.nf
+        qb_log_filter_ctl(QB_LOG_STDERR, QB_LOG_FILTER_ADD,
+                          QB_LOG_FILTER_FORMAT, 'ringbuffer', LOG_TRACE);
+
+.fi
+.PP
+.PP
+\fBThreaded logging\&.\fP
+.RS 4
+To achieve non-blocking logging you can use threaded logging\&. So any calls to write() or syslog() will not hold up your program\&.
+.RE
+.PP
+Threaded logging use: 
+.PP
+.nf
+ main() {
+        qb_log_init('simple-log', LOG_DAEMON, LOG_INFO);
+        qb_log_ctl(QB_LOG_SYSLOG, QB_LOG_CONF_THREADED, QB_TRUE);
+        // \&.\&.\&.
+        daemonize();
+        // call this after you fork()
+        qb_log_thread_start();
+        // \&.\&.\&.
+        qb_log(LOG_WARNING, 'watch out');
+        // \&.\&.\&.
+        qb_log_fini();
+ }
+
+.fi
+.PP
+.PP
+\fBA blackbox for in-field diagnosis\&.\fP
+.RS 4
+This stores log messages in a ringbuffer so they can be written to file if the program crashes (you will need to catch SIGSEGV)\&. These can then be easily printed out later\&.
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+the blackbox is not enabled by default\&.
+.RE
+.PP
+Blackbox usage: 
+.PP
+.nf
+ static void sigsegv_handler(int sig)
+ {
+        (void)signal (SIGSEGV, SIG_DFL);
+        qb_log_blackbox_write_to_file('simple-log\&.fdata');
+        qb_log_fini();
+        raise(SIGSEGV);
+ }
+
+ main() {
+
+        signal(SIGSEGV, sigsegv_handler);
+
+        qb_log_init('simple-log', LOG_DAEMON, LOG_INFO);
+        qb_log_filter_ctl(QB_LOG_BLACKBOX, QB_LOG_FILTER_ADD,
+                          QB_LOG_FILTER_FILE, '*', LOG_DEBUG);
+        qb_log_ctl(QB_LOG_BLACKBOX, QB_LOG_CONF_SIZE, 1024*10);
+        qb_log_ctl(QB_LOG_BLACKBOX, QB_LOG_CONF_ENABLED, QB_TRUE);
+        // \&.\&.\&.
+        qb_log(LOG_WARNING, 'watch out');
+        // \&.\&.\&.
+        qb_log_fini();
+ }
+
+.fi
+.PP
+.PP
+\fBTagging messages\&.\fP
+.RS 4
+You can tag messages using the second argument to \fBqb_logt()\fP or by using \fBqb_log_filter_ctl()\fP\&. This can be used to add feature or sub-system information to the logs\&.
+.RE
+.PP
+.PP
+.nf
+ const char* my_tags_stringify(uint32_t tags) {
+        if (qb_bit_is_set(tags, QB_LOG_TAG_LIBQB_MSG_BIT) {
+                return 'libqb';
+        } else if (tags == 3) {
+                return 'three';
+        } else {
+                return 'MAIN';
+        }
+ }
+ main() {
+        // \&.\&.\&.
+        qb_log_tags_stringify_fn_set(my_tags_stringify);
+        qb_log_format_set(QB_LOG_STDERR, '[%5g] %p %b');
+        // \&.\&.\&.
+        qb_logt(LOG_INFO, 3, 'hello');
+        qb_logt(LOG_INFO, 0, 'hello');
+ }
+.fi
+.PP
+ The code above will produce: 
+.PP
+.nf
+ [libqb] some message
+ [three] info hello
+ [MAIN ] info hello
+
+.fi
+.PP
+ 
+.SH "Define Documentation"
+.PP 
+.SS "#define \fBLOG_TRACE\fP   (LOG_DEBUG + 1)"
+
+.SS "#define \fBqb_enter\fP()   \fBqb_log\fP(\fBLOG_TRACE\fP, 'ENTERING %s()', __func__)"
+
+.SS "#define \fBqb_leave\fP()   \fBqb_log\fP(\fBLOG_TRACE\fP, 'LEAVING %s()', __func__)"
+
+.SS "#define \fBqb_log\fP(\fBpriority\fP, fmt, args\&.\&.\&.)   \fBqb_logt\fP(\fBpriority\fP, 0, fmt, ##args)"
+
+.PP
+This is the main function to generate a log message\&. \fBParameters:\fP
+.RS 4
+\fIpriority\fP this takes syslog priorities\&. 
+.br
+\fIfmt\fP usual printf style format specifiers 
+.br
+\fIargs\fP usual printf style args 
+.RE
+.PP
+
+.SS "#define \fBQB_LOG_BLACKBOX\fP   2"
+
+.SS "#define \fBQB_LOG_INIT_DATA\fP(name)"
+\fBValue:\fP
+.PP
+.nf
+void name(void);                                                   \
+    void name(void) { if (__start___verbose != __stop___verbose) {assert(1);} } \
+    void __attribute__ ((constructor)) name(void);
+.fi
+.SS "#define \fBQB_LOG_MAX_LEN\fP   512"
+
+.SS "#define \fBQB_LOG_STDERR\fP   1"
+
+.SS "#define \fBQB_LOG_STDOUT\fP   3"
+
+.SS "#define \fBQB_LOG_STRERROR_MAX_LEN\fP   128"
+
+.SS "#define \fBQB_LOG_SYSLOG\fP   0"
+
+.SS "#define \fBQB_LOG_TAG_LIBQB_MSG\fP   (1 << \fBQB_LOG_TAG_LIBQB_MSG_BIT\fP)"
+
+.SS "#define \fBQB_LOG_TAG_LIBQB_MSG_BIT\fP   31"
+
+.SS "#define \fBQB_LOG_TARGET_MAX\fP   32"
+
+.SS "#define \fBqb_logt\fP(\fBpriority\fP, \fBtags\fP, fmt, args\&.\&.\&.)"
+\fBValue:\fP
+.PP
+.nf
+do {                     \
+        static struct qb_log_callsite descriptor                        \
+        __attribute__((section('__verbose'), aligned(8))) =             \
+        { __func__, __FILE__, fmt, priority, __LINE__, 0, tags };       \
+        qb_log_real_(&descriptor, ##args);                              \
+    } while(0)
+.fi
+.PP
+This is the function to generate a log message if you want to manually add tags\&. \fBParameters:\fP
+.RS 4
+\fIpriority\fP this takes syslog priorities\&. 
+.br
+\fItags\fP this is a uint32_t that you can use with \fBqb_log_tags_stringify_fn_set()\fP to 'tag' a log message with a feature or sub-system then you can use '%g' in the format specifer to print it out\&. 
+.br
+\fIfmt\fP usual printf style format specifiers 
+.br
+\fIargs\fP usual printf style args 
+.RE
+.PP
+
+.SS "#define \fBqb_perror\fP(\fBpriority\fP, fmt, args\&.\&.\&.)"
+\fBValue:\fP
+.PP
+.nf
+do {                              \
+        char _perr_buf_[QB_LOG_STRERROR_MAX_LEN];                       \
+        const char *_perr_str_ = qb_strerror_r(errno, _perr_buf_, sizeof(_perr_buf_));  \
+        qb_logt(priority, 0, fmt ': %s (%d)', ##args, _perr_str_, errno);               \
+    } while(0)
+.fi
+.PP
+This is similar to perror except it goes into the logging system\&. \fBParameters:\fP
+.RS 4
+\fIpriority\fP this takes syslog priorities\&. 
+.br
+\fIfmt\fP usual printf style format specifiers 
+.br
+\fIargs\fP usual printf style args 
+.RE
+.PP
+
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef void(* \fBqb_log_close_fn\fP)(int32_t t)"
+
+.SS "typedef void(* \fBqb_log_filter_fn\fP)(struct \fBqb_log_callsite\fP *cs)"
+
+.SS "typedef void(* \fBqb_log_logger_fn\fP)(int32_t t, struct \fBqb_log_callsite\fP *cs, time_t timestamp, const char *msg)"
+
+.SS "typedef void(* \fBqb_log_reload_fn\fP)(int32_t t)"
+
+.SS "typedef const char*(* \fBqb_log_tags_stringify_fn\fP)(uint32_t \fBtags\fP)"
+
+.SS "typedef void(* \fBqb_log_vlogger_fn\fP)(int32_t t, struct \fBqb_log_callsite\fP *cs, time_t timestamp, va_list ap)"
+
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBqb_log_conf\fP"
+
+.PP
+\fBEnumerator: \fP
+.in +1c
+.TP
+\fB\fIQB_LOG_CONF_ENABLED \fP\fP
+.TP
+\fB\fIQB_LOG_CONF_FACILITY \fP\fP
+.TP
+\fB\fIQB_LOG_CONF_DEBUG \fP\fP
+.TP
+\fB\fIQB_LOG_CONF_SIZE \fP\fP
+.TP
+\fB\fIQB_LOG_CONF_THREADED \fP\fP
+.TP
+\fB\fIQB_LOG_CONF_PRIORITY_BUMP \fP\fP
+.TP
+\fB\fIQB_LOG_CONF_STATE_GET \fP\fP
+
+.SS "enum \fBqb_log_filter_conf\fP"
+
+.PP
+\fBEnumerator: \fP
+.in +1c
+.TP
+\fB\fIQB_LOG_FILTER_ADD \fP\fP
+.TP
+\fB\fIQB_LOG_FILTER_REMOVE \fP\fP
+.TP
+\fB\fIQB_LOG_FILTER_CLEAR_ALL \fP\fP
+.TP
+\fB\fIQB_LOG_TAG_SET \fP\fP
+.TP
+\fB\fIQB_LOG_TAG_CLEAR \fP\fP
+.TP
+\fB\fIQB_LOG_TAG_CLEAR_ALL \fP\fP
+
+.SS "enum \fBqb_log_filter_type\fP"
+
+.PP
+\fBEnumerator: \fP
+.in +1c
+.TP
+\fB\fIQB_LOG_FILTER_FILE \fP\fP
+.TP
+\fB\fIQB_LOG_FILTER_FUNCTION \fP\fP
+.TP
+\fB\fIQB_LOG_FILTER_FORMAT \fP\fP
+
+.SS "enum \fBqb_log_target_state\fP"
+
+.PP
+\fBEnumerator: \fP
+.in +1c
+.TP
+\fB\fIQB_LOG_STATE_UNUSED \fP\fP
+.TP
+\fB\fIQB_LOG_STATE_DISABLED \fP\fP
+.TP
+\fB\fIQB_LOG_STATE_ENABLED \fP\fP
+
+.SH "Function Documentation"
+.PP 
+.SS "struct \fBqb_log_callsite\fP \fB__attribute__\fP ((aligned(8)))"
+
+.SS "void \fBqb_log_blackbox_print_from_file\fP (const char *filename)"
+
+.PP
+Read the blackbox for file and print it out\&. 
+.SS "ssize_t \fBqb_log_blackbox_write_to_file\fP (const char *filename)"
+
+.PP
+Write the blackbox to file\&. 
+.SS "struct \fBqb_log_callsite\fP* \fBqb_log_callsite_get\fP (const char *function, const char *filename, const char *format, uint8_tpriority, uint32_tlineno, uint32_ttags)\fC [read]\fP"
+
+.PP
+Get or create a callsite at the give position\&. The result can then be passed into \fBqb_log_real_()\fP
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfunction\fP originating function name 
+.br
+\fIfilename\fP originating filename 
+.br
+\fIformat\fP format string 
+.br
+\fIpriority\fP this takes syslog priorities\&. 
+.br
+\fIlineno\fP file line number 
+.br
+\fItags\fP the tag 
+.RE
+.PP
+
+.SS "void \fBqb_log_callsites_dump\fP (void)"
+
+.PP
+Dump the callsite info to stdout\&. 
+.SS "int32_t \fBqb_log_callsites_register\fP (struct \fBqb_log_callsite\fP *_start, struct \fBqb_log_callsite\fP *_stop)"
+
+.PP
+If you are using dynamically loadable modules via dlopen() and you load them after \fBqb_log_init()\fP then after you load the module you will need to do the following to get the filters to work in that module\&. .PP
+.nf
+        _start = dlsym (dl_handle, '__start___verbose');
+        _stop = dlsym (dl_handle, '__stop___verbose');
+        qb_log_callsites_register(_start, _stop);
+.fi
+.PP
+ 
+.SS "int32_t \fBqb_log_ctl\fP (int32_ttarget, enum \fBqb_log_conf\fPconf_type, int32_targ)"
+
+.PP
+Main logging control function\&. \fBParameters:\fP
+.RS 4
+\fItarget\fP QB_LOG_SYSLOG, QB_LOG_STDERR or result from \fBqb_log_file_open()\fP 
+.br
+\fIconf_type\fP what to configure 
+.br
+\fIarg\fP the new value 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBqb_log_conf\fP
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI-errno\fP on error 
+.br
+\fI0\fP on success 
+.br
+\fIqb_log_target_state\fP for QB_LOG_CONF_STATE_GET 
+.RE
+.PP
+
+.SS "void \fBqb_log_custom_close\fP (int32_tt)"
+
+.PP
+Close a custom log target and release is resources\&. 
+.SS "int32_t \fBqb_log_custom_open\fP (\fBqb_log_logger_fn\fPlog_fn, \fBqb_log_close_fn\fPclose_fn, \fBqb_log_reload_fn\fPreload_fn, void *user_data)"
+
+.PP
+Open a custom log target\&. \fBReturn values:\fP
+.RS 4
+\fI-errno\fP on error 
+.br
+\fI3\fP to 31 (to be passed into other qb_log_* functions) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_log_facility2int\fP (const char *fname)"
+
+.PP
+Convert string 'auth' to equivalent number 'LOG_AUTH' etc\&. 
+.SS "const char* \fBqb_log_facility2str\fP (int32_tfnum)"
+
+.PP
+Convert number 'LOG_AUTH' to equivalent string 'auth' etc\&. 
+.SS "void \fBqb_log_file_close\fP (int32_tt)"
+
+.PP
+Close a log file and release is resources\&. 
+.SS "int32_t \fBqb_log_file_open\fP (const char *filename)"
+
+.PP
+Open a log file\&. \fBReturn values:\fP
+.RS 4
+\fI-errno\fP on error 
+.br
+\fI3\fP to 31 (to be passed into other qb_log_* functions) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_log_filter_ctl\fP (int32_tvalue, enum \fBqb_log_filter_conf\fPc, enum \fBqb_log_filter_type\fPtype, const char *text, uint8_tlow_priority)"
+
+.PP
+This allows you modify the 'tags' and 'targets' callsite fields at runtime\&. 
+.SS "int32_t \fBqb_log_filter_ctl2\fP (int32_tvalue, enum \fBqb_log_filter_conf\fPc, enum \fBqb_log_filter_type\fPtype, const char *text, uint8_thigh_priority, uint8_tlow_priority)"
+
+.PP
+This extends \fBqb_log_filter_ctl()\fP by been able to provide a high_priority\&. 
+.SS "int32_t \fBqb_log_filter_fn_set\fP (\fBqb_log_filter_fn\fPfn)"
+
+.PP
+Instead of using the \fBqb_log_filter_ctl()\fP functions you can apply the filters manually by defining a callback and setting the targets field using \fBqb_bit_set()\fP and \fBqb_bit_clear()\fP like the following below\&. .PP
+.nf
+ static void
+ m_filter(struct qb_log_callsite *cs)
+ {
+        if ((cs->priority >= LOG_ALERT &&
+             cs->priority <= LOG_DEBUG) &&
+             strcmp(cs->filename, 'my_c_file\&.c') == 0) {
+                qb_bit_set(cs->targets, QB_LOG_SYSLOG);
+        } else {
+                qb_bit_clear(cs->targets, QB_LOG_SYSLOG);
+        }
+ }
+.fi
+.PP
+ 
+.SS "void \fBqb_log_fini\fP (void)"
+
+.PP
+Logging system finalization function\&. It releases any shared memory\&. Stops the logging thread if running\&. Flushes the last message to their destinations\&. 
+.SS "void \fBqb_log_format_set\fP (int32_tt, const char *format)"
+
+.PP
+Set the format specifiers\&. n FUNCTION NAME f FILENAME l FILELINE p PRIORITY t TIMESTAMP b BUFFER g TAGS N name (passed into qb_log_init) P PID H hostname
+.PP
+any number between % and character specify field length to pad or chop 
+.SS "void \fBqb_log_from_external_source\fP (const char *function, const char *filename, const char *format, uint8_tpriority, uint32_tlineno, uint32_ttags, \&.\&.\&.)"
+
+.PP
+This function is to import logs from other code (like libraries) that provide a callback with their logs\&. \fBNote:\fP
+.RS 4
+the performance of this will not impress you, as the filtering is done on each log message, not before hand\&. So try doing basic pre-filtering\&.
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfunction\fP originating function name 
+.br
+\fIfilename\fP originating filename 
+.br
+\fIformat\fP format string 
+.br
+\fIpriority\fP this takes syslog priorities\&. 
+.br
+\fIlineno\fP file line number 
+.br
+\fItags\fP this is a uint32_t that you can use with \fBqb_log_tags_stringify_fn_set()\fP to 'tag' a log message with a feature or sub-system then you can use '%g' in the format specifer to print it out\&. 
+.RE
+.PP
+
+.SS "void \fBqb_log_from_external_source_va\fP (const char *function, const char *filename, const char *format, uint8_tpriority, uint32_tlineno, uint32_ttags, va_listap)"
+
+.SS "void \fBqb_log_init\fP (const char *name, int32_tfacility, uint8_tpriority)"
+
+.PP
+Init the logging system\&. \fBParameters:\fP
+.RS 4
+\fIname\fP will be passed into openlog() 
+.br
+\fIfacility\fP default for all new targets\&. 
+.br
+\fIpriority\fP a basic filter with this priority will be added\&. 
+.RE
+.PP
+
+.SS "void \fBqb_log_real_\fP (struct \fBqb_log_callsite\fP *cs, \&.\&.\&.)"
+
+.PP
+Internal function: use \fBqb_log()\fP or \fBqb_logt()\fP 
+.SS "void \fBqb_log_real_va_\fP (struct \fBqb_log_callsite\fP *cs, va_listap)"
+
+.SS "void \fBqb_log_tags_stringify_fn_set\fP (\fBqb_log_tags_stringify_fn\fPfn)"
+
+.PP
+Set the callback to map the 'tags' bit map to a string\&. 
+.SS "void \fBqb_log_target_format\fP (int32_ttarget, struct \fBqb_log_callsite\fP *cs, time_ttimestamp, const char *formatted_message, char *output_buffer)"
+
+.PP
+format the callsite and timestamp info according to the format set using \fBqb_log_format_set()\fP It is intended to be used from your custom logger function\&. 
+.SS "void* \fBqb_log_target_user_data_get\fP (int32_tt)"
+
+.PP
+Retrieve the user data set by either qb_log_custom_open or qb_log_target_user_data_set\&. 
+.SS "int32_t \fBqb_log_target_user_data_set\fP (int32_tt, void *user_data)"
+
+.PP
+Associate user data with this log target\&. \fBNote:\fP
+.RS 4
+only use this with custom targets 
+.RE
+.PP
+
+.SS "int32_t \fBqb_log_thread_priority_set\fP (int32_tpolicy, int32_tpriority)"
+
+.PP
+When using threaded logging set the pthread policy and priority\&. \fBReturn values:\fP
+.RS 4
+\fI-errno\fP on error 
+.br
+\fI0\fP success 
+.RE
+.PP
+
+.SS "int32_t \fBqb_log_thread_start\fP (void)"
+
+.PP
+Start the logging pthread\&. 
+.SH "Variable Documentation"
+.PP 
+.SS "enum \fBqb_log_target_state\fP  \fB__attribute__\fP"
+
+.SS "struct \fBqb_log_callsite\fP \fB__start___verbose\fP[]"
+
+.SS "struct \fBqb_log_callsite\fP \fB__stop___verbose\fP[]"
+
+.SS "const char* \fBfilename\fP"
+
+.SS "const char* \fBformat\fP"
+
+.SS "const char* \fBfunction\fP"
+
+.SS "uint32_t \fBlineno\fP"
+
+.SS "uint8_t \fBpriority\fP"
+
+.SS "uint32_t \fBtags\fP"
+
+.SS "uint32_t \fBtargets\fP"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

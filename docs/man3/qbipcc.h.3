@@ -1,0 +1,302 @@
+.TH "qbipcc.h" 3 "Sun Mar 11 2012" "Version 0.11.1" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbipcc.h \- 
+.PP
+Client IPC API\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <qb/qbconfig\&.h>\fP
+.br
+\fC#include <pthread\&.h>\fP
+.br
+\fC#include <sys/poll\&.h>\fP
+.br
+\fC#include <sys/socket\&.h>\fP
+.br
+\fC#include <qb/qbhdb\&.h>\fP
+.br
+\fC#include <qb/qbipc_common\&.h>\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef struct qb_ipcc_connection \fBqb_ipcc_connection_t\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBqb_ipcc_connection_t\fP * \fBqb_ipcc_connect\fP (const char *name, size_t max_msg_size)"
+.br
+.RI "\fICreate a connection to an IPC service\&. \fP"
+.ti -1c
+.RI "void \fBqb_ipcc_disconnect\fP (\fBqb_ipcc_connection_t\fP *c)"
+.br
+.RI "\fIDisconnect an IPC connection\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_ipcc_fd_get\fP (\fBqb_ipcc_connection_t\fP *c, int32_t *fd)"
+.br
+.RI "\fIGet the file descriptor to poll\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_ipcc_fc_enable_max_set\fP (\fBqb_ipcc_connection_t\fP *c, uint32_t max)"
+.br
+.RI "\fISet the maximum allowable flowcontrol value\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_ipcc_send\fP (\fBqb_ipcc_connection_t\fP *c, const void *msg_ptr, size_t msg_len)"
+.br
+.RI "\fISend a message\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_ipcc_sendv\fP (\fBqb_ipcc_connection_t\fP *c, const struct iovec *iov, size_t iov_len)"
+.br
+.RI "\fISend a message (iovec)\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_ipcc_recv\fP (\fBqb_ipcc_connection_t\fP *c, void *msg_ptr, size_t msg_len, int32_t ms_timeout)"
+.br
+.RI "\fIReceive a response\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_ipcc_sendv_recv\fP (\fBqb_ipcc_connection_t\fP *c, const struct iovec *iov, uint32_t iov_len, void *msg_ptr, size_t msg_len, int32_t ms_timeout)"
+.br
+.RI "\fIThis is a convenience function that simply sends and then recvs\&. \fP"
+.ti -1c
+.RI "ssize_t \fBqb_ipcc_event_recv\fP (\fBqb_ipcc_connection_t\fP *c, void *msg_ptr, size_t msg_len, int32_t ms_timeout)"
+.br
+.RI "\fIReceive an event\&. \fP"
+.ti -1c
+.RI "void \fBqb_ipcc_context_set\fP (\fBqb_ipcc_connection_t\fP *c, void *context)"
+.br
+.RI "\fIAssociate a 'user' pointer with this connection\&. \fP"
+.ti -1c
+.RI "void * \fBqb_ipcc_context_get\fP (\fBqb_ipcc_connection_t\fP *c)"
+.br
+.RI "\fIGet the context (set previously) \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+Client IPC API\&. 
+
+\fBLifecycle of an IPC connection\&.\fP
+.RS 4
+An IPC connection is made to the server with \fBqb_ipcc_connect()\fP\&. This function connects to the server and requests channels be created for communication\&. To disconnect, the client either exits or executes the function \fBqb_ipcc_disconnect()\fP\&.
+.RE
+.PP
+\fBSynchronous communication\fP
+.RS 4
+The function \fBqb_ipcc_sendv_recv()\fP sends an iovector request and receives a response\&.
+.RE
+.PP
+\fBAsynchronous requests from the client\fP
+.RS 4
+The function \fBqb_ipcc_sendv()\fP sends an iovector request\&. The function \fBqb_ipcc_send()\fP sends an message buffer request\&.
+.RE
+.PP
+\fBAsynchronous events from the server\fP
+.RS 4
+The \fBqb_ipcc_event_recv()\fP function receives an out-of-band asyncronous message\&. The asynchronous messages are queued and can provide very high out-of-band performance\&. To determine when to call \fBqb_ipcc_event_recv()\fP the \fBqb_ipcc_fd_get()\fP call is used to obtain a file descriptor used in the poll() or select() system calls\&. 
+.RE
+.PP
+
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef struct qb_ipcc_connection \fBqb_ipcc_connection_t\fP"
+
+.SH "Function Documentation"
+.PP 
+.SS "\fBqb_ipcc_connection_t\fP* \fBqb_ipcc_connect\fP (const char *name, size_tmax_msg_size)"
+
+.PP
+Create a connection to an IPC service\&. \fBParameters:\fP
+.RS 4
+\fIname\fP name of the service\&. 
+.br
+\fImax_msg_size\fP biggest msg size\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+NULL (error: see errno) or a connection object\&. 
+.RE
+.PP
+
+.SS "void* \fBqb_ipcc_context_get\fP (\fBqb_ipcc_connection_t\fP *c)"
+
+.PP
+Get the context (set previously) \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+the context 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBqb_ipcc_context_set()\fP 
+.RE
+.PP
+
+.SS "void \fBqb_ipcc_context_set\fP (\fBqb_ipcc_connection_t\fP *c, void *context)"
+
+.PP
+Associate a 'user' pointer with this connection\&. \fBParameters:\fP
+.RS 4
+\fIcontext\fP the point to associate with this connection\&. 
+.br
+\fIc\fP connection instance 
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBqb_ipcc_context_get()\fP 
+.RE
+.PP
+
+.SS "void \fBqb_ipcc_disconnect\fP (\fBqb_ipcc_connection_t\fP *c)"
+
+.PP
+Disconnect an IPC connection\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.RE
+.PP
+
+.SS "ssize_t \fBqb_ipcc_event_recv\fP (\fBqb_ipcc_connection_t\fP *c, void *msg_ptr, size_tmsg_len, int32_tms_timeout)"
+
+.PP
+Receive an event\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fImsg_ptr\fP pointer to a message buffer to receive into 
+.br
+\fImsg_len\fP the size of the buffer 
+.br
+\fIms_timeout\fP time in milli seconds to wait for a message 0 == no wait, negative == block, positive == wait X ms\&. 
+.br
+\fIms_timeout\fP max time to wait for a response 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+size of the message or error (-errno) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_ipcc_fc_enable_max_set\fP (\fBqb_ipcc_connection_t\fP *c, uint32_tmax)"
+
+.PP
+Set the maximum allowable flowcontrol value\&. \fBNote:\fP
+.RS 4
+the default is 1
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fImax\fP the max allowable flowcontrol value (1 or 2) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_ipcc_fd_get\fP (\fBqb_ipcc_connection_t\fP *c, int32_t *fd)"
+
+.PP
+Get the file descriptor to poll\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fIfd\fP (out) file descriptor to poll 
+.RE
+.PP
+
+.SS "ssize_t \fBqb_ipcc_recv\fP (\fBqb_ipcc_connection_t\fP *c, void *msg_ptr, size_tmsg_len, int32_tms_timeout)"
+
+.PP
+Receive a response\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fImsg_ptr\fP pointer to a message buffer to receive into 
+.br
+\fImsg_len\fP the size of the buffer 
+.br
+\fIms_timeout\fP max time to wait for a response 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(size recv'ed, -errno == error) 
+.RE
+.PP
+
+.SS "ssize_t \fBqb_ipcc_send\fP (\fBqb_ipcc_connection_t\fP *c, const void *msg_ptr, size_tmsg_len)"
+
+.PP
+Send a message\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fImsg_ptr\fP pointer to a message to send 
+.br
+\fImsg_len\fP the size of the message 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(size sent, -errno == error) 
+.RE
+.PP
+
+.SS "ssize_t \fBqb_ipcc_sendv\fP (\fBqb_ipcc_connection_t\fP *c, const struct iovec *iov, size_tiov_len)"
+
+.PP
+Send a message (iovec)\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fIiov\fP pointer to an iovec struct to send 
+.br
+\fIiov_len\fP the number of iovecs used 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(size sent, -errno == error) 
+.RE
+.PP
+
+.SS "ssize_t \fBqb_ipcc_sendv_recv\fP (\fBqb_ipcc_connection_t\fP *c, const struct iovec *iov, uint32_tiov_len, void *msg_ptr, size_tmsg_len, int32_tms_timeout)"
+
+.PP
+This is a convenience function that simply sends and then recvs\&. \fBParameters:\fP
+.RS 4
+\fIc\fP connection instance 
+.br
+\fIiov\fP pointer to an iovec struct to send 
+.br
+\fIiov_len\fP the number of iovecs used 
+.br
+\fImsg_ptr\fP pointer to a message buffer to receive into 
+.br
+\fImsg_len\fP the size of the buffer 
+.br
+\fIms_timeout\fP max time to wait for a response
+.RE
+.PP
+\fBSee also:\fP
+.RS 4
+\fBqb_ipcc_sendv()\fP \fBqb_ipcc_recv()\fP 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

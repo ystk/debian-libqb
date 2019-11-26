@@ -1,0 +1,303 @@
+.TH "qbhdb.h" 3 "Sun Mar 11 2012" "Version 0.11.1" "libqb" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+qbhdb.h \- 
+.PP
+The handle database is for reference counting objects\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdlib\&.h>\fP
+.br
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <inttypes\&.h>\fP
+.br
+\fC#include <qb/qbarray\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBqb_hdb_handle\fP"
+.br
+.ti -1c
+.RI "struct \fBqb_hdb\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fB_GNU_SOURCE\fP"
+.br
+.ti -1c
+.RI "#define \fBQB_HDB_D_FORMAT\fP   '%'PRIu64"
+.br
+.ti -1c
+.RI "#define \fBQB_HDB_X_FORMAT\fP   '%'PRIx64"
+.br
+.ti -1c
+.RI "#define \fBQB_HDB_DECLARE\fP(database_name, destructor_function)"
+.br
+.RI "\fIConvience macro for declaring a file scoped handle database\&. \fP"
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef uint64_t \fBqb_handle_t\fP"
+.br
+.RI "\fIGeneric handle type is 64 bits\&. \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBqb_hdb_create\fP (struct \fBqb_hdb\fP *hdb)"
+.br
+.RI "\fICreate a new database\&. \fP"
+.ti -1c
+.RI "void \fBqb_hdb_destroy\fP (struct \fBqb_hdb\fP *hdb)"
+.br
+.RI "\fIDestroy a handle database\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_handle_create\fP (struct \fBqb_hdb\fP *hdb, int32_t instance_size, \fBqb_handle_t\fP *handle_id_out)"
+.br
+.RI "\fICreate a new handle\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_handle_get\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fP handle_in, void **instance)"
+.br
+.RI "\fIGet the instance associated with this handle and increase it's refcount\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_handle_get_always\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fP handle_in, void **instance)"
+.br
+.RI "\fIGet the instance associated with this handle and increase it's refcount\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_handle_put\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fP handle_in)"
+.br
+.RI "\fIPut the instance associated with this handle and decrease it's refcount\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_handle_destroy\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fP handle_in)"
+.br
+.RI "\fIRequest the destruction of the object\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_handle_refcount_get\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fP handle_in)"
+.br
+.RI "\fIGet the current refcount\&. \fP"
+.ti -1c
+.RI "void \fBqb_hdb_iterator_reset\fP (struct \fBqb_hdb\fP *hdb)"
+.br
+.RI "\fIReset the iterator\&. \fP"
+.ti -1c
+.RI "int32_t \fBqb_hdb_iterator_next\fP (struct \fBqb_hdb\fP *hdb, void **instance, \fBqb_handle_t\fP *handle)"
+.br
+.RI "\fIGet the next object and increament it's refcount\&. \fP"
+.ti -1c
+.RI "uint32_t \fBqb_hdb_base_convert\fP (\fBqb_handle_t\fP handle)"
+.br
+.ti -1c
+.RI "uint64_t \fBqb_hdb_nocheck_convert\fP (uint32_t handle)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+The handle database is for reference counting objects\&. 
+
+
+.SH "Define Documentation"
+.PP 
+.SS "#define \fB_GNU_SOURCE\fP"
+
+.SS "#define \fBQB_HDB_D_FORMAT\fP   '%'PRIu64"
+
+.SS "#define \fBQB_HDB_DECLARE\fP(database_name, destructor_function)"
+\fBValue:\fP
+.PP
+.nf
+static struct qb_hdb (database_name) = {                           \
+        \&.handle_count    = 0,                                            \
+        \&.handles = NULL,                                         \
+        \&.iterator        = 0,                                            \
+        \&.destructor      = destructor_function,                          \
+        \&.first_run       = 1                                             \
+};                                                                      \
+.fi
+.PP
+Convience macro for declaring a file scoped handle database\&. .PP
+.nf
+ QB_HDB_DECLARE(my_handle_database, NULL);
+.fi
+.PP
+ 
+.SS "#define \fBQB_HDB_X_FORMAT\fP   '%'PRIx64"
+
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef uint64_t \fBqb_handle_t\fP"
+
+.PP
+Generic handle type is 64 bits\&. 
+.SH "Function Documentation"
+.PP 
+.SS "uint32_t \fBqb_hdb_base_convert\fP (\fBqb_handle_t\fPhandle)"
+
+.SS "void \fBqb_hdb_create\fP (struct \fBqb_hdb\fP *hdb)"
+
+.PP
+Create a new database\&. \fBParameters:\fP
+.RS 4
+\fIhdb\fP the database to init\&. 
+.RE
+.PP
+
+.SS "void \fBqb_hdb_destroy\fP (struct \fBqb_hdb\fP *hdb)"
+
+.PP
+Destroy a handle database\&. \fBParameters:\fP
+.RS 4
+\fIhdb\fP the database to destroy\&. 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_handle_create\fP (struct \fBqb_hdb\fP *hdb, int32_tinstance_size, \fBqb_handle_t\fP *handle_id_out)"
+
+.PP
+Create a new handle\&. \fBParameters:\fP
+.RS 4
+\fIhdb\fP the database instance 
+.br
+\fIinstance_size\fP size of the object to malloc 
+.br
+\fIhandle_id_out\fP new handle 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == ok, -errno faliure) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_handle_destroy\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fPhandle_in)"
+
+.PP
+Request the destruction of the object\&. When the refcount is 0, it will be destroyed\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIhandle_in\fP the handle 
+.br
+\fIhdb\fP the database instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == ok, -errno faliure) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_handle_get\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fPhandle_in, void **instance)"
+
+.PP
+Get the instance associated with this handle and increase it's refcount\&. \fBParameters:\fP
+.RS 4
+\fIhandle_in\fP the handle 
+.br
+\fIhdb\fP the database instance 
+.br
+\fIinstance\fP (out) pointer to the desired object\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == ok, -errno faliure) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_handle_get_always\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fPhandle_in, void **instance)"
+
+.PP
+Get the instance associated with this handle and increase it's refcount\&. \fBParameters:\fP
+.RS 4
+\fIhandle_in\fP the handle 
+.br
+\fIhdb\fP the database instance 
+.br
+\fIinstance\fP (out) pointer to the desired object\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == ok, -errno faliure) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_handle_put\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fPhandle_in)"
+
+.PP
+Put the instance associated with this handle and decrease it's refcount\&. \fBParameters:\fP
+.RS 4
+\fIhandle_in\fP the handle 
+.br
+\fIhdb\fP the database instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == ok, -errno faliure) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_handle_refcount_get\fP (struct \fBqb_hdb\fP *hdb, \fBqb_handle_t\fPhandle_in)"
+
+.PP
+Get the current refcount\&. \fBParameters:\fP
+.RS 4
+\fIhandle_in\fP the handle 
+.br
+\fIhdb\fP the database instance 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(>= 0 is the refcount, -errno faliure) 
+.RE
+.PP
+
+.SS "int32_t \fBqb_hdb_iterator_next\fP (struct \fBqb_hdb\fP *hdb, void **instance, \fBqb_handle_t\fP *handle)"
+
+.PP
+Get the next object and increament it's refcount\&. Remember to call \fBqb_hdb_handle_put()\fP
+.PP
+\fBParameters:\fP
+.RS 4
+\fIhdb\fP the database instance 
+.br
+\fIhandle\fP (out) the handle 
+.br
+\fIinstance\fP (out) pointer to the desired object\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+(0 == ok, -errno faliure) 
+.RE
+.PP
+
+.SS "void \fBqb_hdb_iterator_reset\fP (struct \fBqb_hdb\fP *hdb)"
+
+.PP
+Reset the iterator\&. \fBParameters:\fP
+.RS 4
+\fIhdb\fP the database instance 
+.RE
+.PP
+
+.SS "uint64_t \fBqb_hdb_nocheck_convert\fP (uint32_thandle)"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libqb from the source code\&.

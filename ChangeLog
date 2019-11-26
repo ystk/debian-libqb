@@ -1,0 +1,1999 @@
+2012-03-11  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump the version to 0.11.1
+
+2012-03-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: remove some old timerfd code.
+
+	TEST: add a test to check the order of the jobs
+
+	LOOP: when new jobs are added they are added to the head instead of the tail.
+	We must add new jobs to the tail of the job queue otherwise
+	old jobs will get stuck in the job list.
+
+	LOG: Now the array is self locking we can make the lookup array dynamic
+
+	Add locking to the array when growing.
+
+	IPC: make the _request_q_len_get() function more obvious.
+
+	IPC: fix multiple receives from qb_ipc_us_recv()
+	So this function is used by the QB_IPC_SOCKET transport
+	and is used like recv(,, max_size_of_my_rx_buf,,);
+	But in the shared mem transport it is used to recv
+	a notification of something in shared mem is available
+	in this case we really want to make sure we recv all
+	the notifications. So I have split these into 2 functions.
+
+	IPC: make sure that the wrong union member is not written to.
+	Move the connection type into the one_way struct. Seem
+	like a more obvious place for it next to the union.
+
+	Also it will help prevent issues like in qb_ipc_us_recv()
+	where there is a rather dodgy access of ctl->sent.
+
+	TIMER: check for null timer handle
+
+2012-03-07  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump the version to 0.11.0
+
+2012-03-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	ARRAY: cleanup the pointer sizeof()
+
+	LOG: turn off __attribute__(section) for powerpc (not working)
+
+	TESTS: move the util tests into "slow-tests" (i.e. optional)
+	So this this test is timing sensitive and can easily fail on slow
+	build farm machines. So I have enabled it on the --enable-slow-tests
+	configure option and put this into ./check as the default.
+
+	TEST: make the test_priority the same type as in the callsite
+
+	LOG: make the log arrays manually grow-able since we need to lock the calls.
+
+	RB: fix test failure on ppc
+
+	RB: change the name of the size to word_size to be more clear
+
+2012-03-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: add some more signal tests.
+	-Make sure we only get one callback per signal
+	-Make sure we correctly delete a callback even if it has been
+	 put in the job queue.
+
+	LOOP: fix deletion of signal handlers when they are pending
+
+	LOOP: signal handlers were always added as high priority.
+	This now adds them as requested by the user.
+
+2012-03-05  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: deal with mac's limited sed
+
+	check: add debugging to the configure options and remove unused options
+
+	TEST: properly clear the filters
+
+	LOG: expose the mechanism to get a dynamic callsite.
+
+2012-02-24  Angus Salkeld  <asalkeld@redhat.com>
+
+	Revert part of my COARSE grained timer commit
+	The stopwatch and timers use qb_util_nano_current_get()
+	and need to be accurate. This does't seem to effect
+	performance at all so no loss there.
+
+	Remove timerfd usage and go back to timelist.
+	timefd is using too much cpu and it is using up
+	file descriptors.
+
+	timelist is also more portable and now I have less
+	code to maintain.
+
+	UTIL: if possible use COARSE resolution clocks - they are much faster.
+
+2012-02-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	ARRAY: save memory (in the bins array) and allow holes in the array
+
+	LOOP: add qb_loop_timer_is_running()
+
+2012-02-20  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: allow stop() and run() to be called with NULL loop instance.
+
+	LOOP: fix doxygen parameter comment
+
+	LOG: add stdout target
+
+2012-02-15  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: add a function to delete jobs
+
+	LOG: remove debug printf's
+
+	LOG: remove an old/incorrect doxygen comment.
+
+	LOG: add a hostname %H format specifier.
+	This is useful when logging to file on a cluster.
+
+	LOG: Add qb_log_filter_fn_set()
+
+2012-02-14  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Fix "make distcheck" add include path to AM_CPPFLAGS
+	strl* files are built a bit differently and need the global
+	flags
+
+	Bump the version to 0.10.1
+
+2012-02-14  Angus Salkeld  <asalkeld@redhat.com>
+
+	clang: Remove unused code
+
+	TEST: make the ipc failure test closer to corosync's case.
+
+	RB: add a debug message if trying to read a message of the wrong size
+
+	IPC: split up the recv into chuncks of 2 seconds.
+	This is because semaphores can't detect the other side has
+	failed/exited. So we rely on the socket poll to tell us.
+
+	Be more consistent with the internal logs.
+
+2012-02-10  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: make it possible to pass in NULL as the default loop instance
+
+2012-02-08  Angus Salkeld  <asalkeld@redhat.com>
+
+	RB: use the proper struct not the typedef in the implementation.
+
+	RB: Fix potential mem leak
+
+	Don't mix enums (QB_TRUE/TRUE)
+
+	use random() not rand()
+
+	Remove dead code
+
+	set umask before calling mkstemp()
+
+	Use safer versions of string functions (strcpy -> strlcpy)
+
+	Increase the coverity aggressiveness
+
+	TEST: make the loop ratelimit test more forgiving.
+
+2012-02-07  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump the lib version to 0.10.0
+
+2012-02-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: handle errors from the poll function
+
+	LOOP: make the item type applicable to jobs too.
+	Mainly for diagnostics
+
+	LOOP: fix the todo calculations.
+	The todo system was sucky as it was calculated in different
+	places in the mainloop and at each level. This was exposed by
+	calls to qb_loop_level_item_del() which decremented the level->todo
+	but not the mainloop one. So now we re-calculate it each time.
+
+	TEST: check for a single job causing a cpu spin
+
+	LOOP: prevent jobs from consuming too much cpu.
+
+2012-02-03  Angus Salkeld  <asalkeld@redhat.com>
+
+	Get coverity to ignore this warning.
+	"Using uninitialized element of array"
+
+	Change example code to use fgets instead of gets
+
+	LOG: pass the result of qb_log_thread_start() back to the user
+
+	Fix some issues found by clang
+
+	Add clang-analyzer check
+
+2012-02-01  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add a split timer to the stopwatch.
+	This is just a re-work of Steve's sample patch.
+
+	You set the number of splits and whether they overwrite using
+	qb_util_stopwatch_split_ctl().
+
+2012-01-31  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: merge common code into new function
+	This also fixes a regression caused by:
+	42c92fb675a29bb1ec9f718c17daede82d5de3e2
+
+	IPC: better handle a disconnect been called from within connection_created()
+
+2012-01-27  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: fix scary typo
+	Not sure how this happened
+
+	IPC: fix server error handling
+
+2012-01-26  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	TEST: Make sure the generated files have the correct include paths
+
+	Bump the library version to 0.9.0
+
+2012-01-25  Angus Salkeld  <asalkeld@redhat.com>
+
+	PTRIE: refcount the notifier structs
+	This fixes: https://github.com/asalkeld/libqb/issues/29
+
+2012-01-24  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: make sure qb_log_from_external_source() takes priority into account.
+	Fixes: https://github.com/asalkeld/libqb/issues/28
+
+	Deprecate qb_util_set_log_function()
+	And remove uses of it from the test programs
+
+2012-01-23  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: only bump messages that need it (>info)
+	else all the messages get their priorities distorted
+
+	LOOP: allow a timer to be created without returning the handle
+	This is if the user does not plan to delete the timer.
+
+	IPC: this 1 sec wait is slowing all normal dissconnects down
+	this works just as well with a timeout of 0
+
+2012-01-21  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: check for the server liveness before disconnecting.
+	if the server is dead then is_connected will cause the resourses
+	to be properly cleaned up.
+
+2012-01-18  Angus Salkeld  <asalkeld@redhat.com>
+
+	TESTS: add tests for signal handlers
+
+	IPC: add a context to the client interface
+
+2012-01-17  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: make sure the format is checked.
+	In case of log clashes (same file/lineno but in different directories.
+
+	TEST: make sure qb_log() can be called before init.
+	The log is dropped but it won't crash.
+
+2012-01-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	make the pc file auto detect -lrt
+
+	Add a test to enforce standalone headers and protectors
+
+	Make all headers self standing
+	So the user does not have to include any required headers.
+
+	make header protection more consistent.
+
+	TEST: change the script to .sh and generated c file to auto_
+	Just to make cleanup easier
+
+2012-01-12  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: fix resource cleanup if the server dies
+
+2012-01-11  Angus Salkeld  <asalkeld@redhat.com>
+
+	ipc test: remove try again hack
+	This was needed because I didn't realise the timeout was broken.
+	(at least this works now)
+
+	Fix check_ipc.c formatting.
+
+2012-01-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add %P (pid) as a format option.
+
+	LOG: add %N (log name) as a format option
+	This will log the name passed into qb_log_init()
+
+	UTIL: fix qb_timespec_add_ms()
+	It was overwriting the timespec value instead of
+	add to it.
+
+2012-01-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: make it possible to pass in a NULL filename/function into qb_log_from_external_source()
+
+2012-01-05  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump the library version.
+
+2012-01-05  Angus Salkeld  <asalkeld@redhat.com>
+
+	ipc: make coverity happy.
+
+	Fix two simple coverity warnings
+
+	trie: correct the free'ing of node mem
+
+	Fix ./check -h output
+
+	map: free unused leaf nodes
+	So if a node has no children and no value or notifier
+	then it is freed.
+
+2012-01-04  Angus Salkeld  <asalkeld@redhat.com>
+
+	Allow the array to automatically grow.
+	this makes it a bit friendlier to use, as
+	the user will not have to call qb_array_grow().
+
+	map: add some introductory doxygen
+
+2012-01-03  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: remove fd from poll loop in the disconnect
+	Until now we have been relying on getting a POLLHUP, but
+	under heavy load we seem to get an old poll event
+	that cause a double deref of the connection object.
+
+	IPC: add a new state to the connection state
+	This to handle disconnecting in a failure state (before
+	the connection has been established.
+
+	Another aspect to this is we don't want to call
+	connection_destroyed() if we haven't called
+	connection_created().
+
+2011-12-29  Yunkai Zhang  <qiushu.zyk@taobao.com>
+
+	Fixed bug: incorrect array length definition
+	When MAX_BINS is larger than MAX_BIN_ELEMENTS, this bug will cause
+	boudary overflow in qb_array_create function.
+
+2011-12-22  Fabio M. Di Nitto  <fdinitto@redhat.com>
+
+	Fix a compile warning on sparc (epoll_create1)
+	The problem is that sys/epoll.h was broken on sparc and alpha for a
+	bunch of glibc releases.
+
+	glibc has the symbol correctly exported, that's why ./configure finds
+	it, but the header is not always correct. Recent versions of glibc have
+	the correct header, so we simply workaround the broken ones.
+
+	This fix is only necessary to build with --enable-fatal-warnings,
+	otherwise you simply see a build warning, but there are no runtime
+	issues at any stage.
+
+2011-12-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	re-fix qb_strerror_r() in case caller frees buf.
+
+2011-12-22  Fabio M. Di Nitto  <fdinitto@redhat.com>
+
+	Fix some sparc test failures.
+	I (Angus) have changed some of Fabio's changes.
+
+2011-12-21  Andrew Beekhof  <andrew@beekhof.net>
+
+	LOG: pass args directly into qb_log_from_external_source()
+
+2011-12-21  Angus Salkeld  <asalkeld@redhat.com>
+
+	check: add mac checker
+
+	Merge some portability changes from the mingw branch
+
+	Re-add new automake options
+	I like the automake options (and encourage other developers to
+	install the neccessary autotools).
+
+	Here is a handy script to install the newest autotools
+	into a private directory (if you can't get them pre-packaged).
+	http://people.redhat.com/meyering/autotools-install
+
+	autotools-install --prefix=$HOME/autotools --skip-check
+
+2011-12-19  Andrew Beekhof  <andrew@beekhof.net>
+
+	Support compilation on Mac OSX
+
+2011-12-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	make -rt configurable (not needed on mac)
+	Thanks to Andrew Beekhof
+
+	fix strerror on non-linux
+
+2011-12-18  Angus Salkeld  <asalkeld@redhat.com>
+
+	check: add abi & api to help
+
+	trie: don't create children array on all nodes
+	(save mem on leaf nodes)
+
+	map: tweek the tests to better test ptrie
+
+	trie: convert the trie to a patricia trie (or radix tree)
+	http://en.wikipedia.org/wiki/Radix_tree
+
+	The point of this is to save memory.
+
+	examples: add example corosync data to mapnotify.c
+
+	trie: add a way to get node count and mem usage
+
+	trie: split trie_lookup into trie_lookup and trie_insert
+
+2011-12-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	clean .version .tarball-version
+
+2011-12-14  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: provide finer grained flowcontrol
+	this will allow the user to control the behaviour better.
+
+	MAP: add honza's example application.
+
+	MAP: add a notifier purely to allow the user to free memory.
+	At the moment if you have multiple notifiers it becomes impossible
+	to figure out when it is safe to free the values.
+
+	This new callback can only be added once and is called
+	once, making it better suited to freeing memory. It is
+	also called after the deleted and replaced notifiers.
+
+2011-12-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	Improve the stopwatch doxygen comments.
+
+2011-11-25  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix errors found by api-sanity-autotest
+
+	map: enforce uniqueness of the notifiers based on (func,key,event,userdata)
+
+	map: add qb_map_notify_del_2() which includes the userdata.
+	This allows you to match on the same fields that you provided
+	in the add. Now including the userdata.
+
+	skiplist: add the inserted notification
+
+	skiplist: implement skiplist_notify_del()
+
+	Hashtable: fix the ordering of the new/old value in the notification
+
+	Add tests for hash and skiplist notifications
+
+	By default don't build in the slow benchlog
+
+2011-11-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	check: add abi checking script
+
+2011-11-16  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump the library version to 0.7.0
+
+2011-11-10  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: free up the signal list when qb_loop_destory() is called
+
+	LOG: improve the removal of filters
+
+	LOG: clean up mem better when qb_log_fini is called
+
+	ARRAY: make sure that num_bins stays below MAX_BINS
+
+	TEST: add a test that reproduces issue/20
+	https://github.com/asalkeld/libqb/issues/20
+
+2011-11-08  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix ./check -h output
+
+	Lindent formatting changes.
+
+	LOOP: close opened pipe if function fails
+
+	LOG: change assert into an early return
+
+	Remove unnecessary checks before free()
+
+	MAP: Fix trie_new_node() and make skiplist_node_new() more consistent.
+
+2011-11-08  miz-take  <miz-take3@gmail.com>
+
+	Improve the error handling esp. after failed malloc's
+	Reviewed-by: Angus Salkeld <asalkeld@redhat.com>
+
+2011-10-24  Angus Salkeld  <asalkeld@redhat.com>
+
+	skiplist: destroy the list header last.
+
+2011-10-23  Angus Salkeld  <asalkeld@redhat.com>
+
+	examples: add ipc client/server
+
+	examples: Add tcpclient.c/tcpserver.c
+
+	Move simple-log.c to examples/
+
+	TEST: fix the map load test.
+
+	LOG: check for SCHED_IDLE
+
+	LOG: fix filter input check
+
+	LOG: add stdarg to qblog.h
+
+	Add a ./check mock
+
+2011-10-21  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: only range check "t" when filtering else tags are not applied.
+
+2011-10-18  Angus Salkeld  <asalkeld@redhat.com>
+
+	Log: move the lock to below the sem_wait
+	(coverity ordering warning)
+
+	check: add a handy coverity check
+	./check coverity
+
+	TEST: add a simple test for right-aligned text in format strings
+
+2011-10-18  Andrew Beekhof  <andrew@beekhof.net>
+
+	Log: Support right-aligned text in format strings
+
+2011-10-18  Yunkai Zhang  <qiushu.zyk@taobao.com>
+
+	Fixed segment fault bug when use logging API at i386 platform
+	This bug cause by qb_vsprintf_serialize function. It parse "%llx" format
+	as _long_ other than _long long_.
+
+	At x86_64 platform, both sizeof(long) and sizeof(long long) is 8, this
+	issue would not be triggered, so we could only catch it at i386.
+
+2011-09-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	MAP: pass user_data to the callback correctly
+
+2011-09-15  Angus Salkeld  <asalkeld@redhat.com>
+
+	MAP: add a more generic notification system
+
+2011-09-13  Angus Salkeld  <asalkeld@redhat.com>
+
+	MAP: add prefix iteration for the trie
+
+	hashtable: fix the iterator
+
+	skiplist: fix order of deref
+
+	skiplist: use ++ and -- operators
+
+	MAP: improve the storage in the trie
+
+	TESTS: improve the map tests
+	- add a iterator to test_map_simple()
+	- improve the test output
+
+2011-09-12  Angus Salkeld  <asalkeld@redhat.com>
+
+	MAP: add a trie implementation
+	http://en.wikipedia.org/wiki/Trie
+
+2011-09-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: allow large priorities
+	They will be printed as trace, it's mainly to make
+	filtering more flexible
+
+	LOG: add qb_log_filter_ctl2() so we can filter a range of priorities
+
+2011-09-09  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump the library version.
+
+2011-09-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix QB_LOG_INIT_DATA
+	this is weird, but now it actually works
+
+2011-09-08  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add a way of getting the target state
+	This is so we can do the following:
+
+	for (t = 0; t < QB_LOG_TARGET_MAX; t++) {
+	    if (qb_log_ctl(t, QB_LOG_CONF_STATE_GET, 0) == QB_LOG_STATE_ENABLED) {
+	        // bla bla
+	    }
+	}
+
+	LOG: support comma seperated lists of file and function filters
+
+2011-09-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	map: add iterator that does't use a callback
+
+	MAP: change the keys from void* to char*
+	I think this is the most common usage and greatly
+	simplifies the api.
+
+	LOG: add facility conversion functions
+
+2011-09-01  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix the default syslog filter
+
+2011-08-26  Angus Salkeld  <asalkeld@redhat.com>
+
+	defs: better define va_copy
+
+	Fix "./check dist"
+
+2011-08-25  Angus Salkeld  <asalkeld@redhat.com>
+
+	hashtable: Fix a lint warning
+
+2011-08-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix ansi build
+
+	Initial map using either a skiplist or a hashtable
+
+	Add a stop watch
+
+	docs: add utils to the mainpage
+
+	LOG: serialize the va_list, don't snprintf
+
+2011-08-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: change active list into array access
+	just keep track of the max used targets
+
+	TEST: add int arguments to log bench
+
+	atomic: fix qb_atomic_pointer macros
+
+2011-08-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: allow the thread priority to be set.
+
+2011-07-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix splint warning on ubuntu 11.04
+
+2011-07-18  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Make sure write_logs.c is deleted by "make distclean"
+
+2011-07-14  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: move priority check up to prevent unnecessary format.
+
+	Add a qb_strerror_r wrapper.
+	This is to make the calling code more portable
+
+	Remove TODO from dist_doc_DATA
+
+2011-07-13  Angus Salkeld  <asalkeld@redhat.com>
+
+	Delete TODO (use github issues)
+
+	Add some more content to the README
+
+	LOG: add string.h to qblog.h
+
+2011-06-27  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: use strerror_r instead of strerror in qb_perror()
+
+	TEST: bump up the logging timeout
+	This was failing on sparcv9, but seems to just be a slow machine.
+	With a bigger timeout it passes.
+
+2011-06-26  Angus Salkeld  <asalkeld@redhat.com>
+
+	configure: improve arch & os detection output.
+
+	LOG: fix alignment compiler warning on sparc
+
+	Revert "LOG: use uint8_t for pointer manipulation"
+	This reverts commit a47ae0b6598f16189d55386ef9a3ad1cad204893.
+
+2011-06-26  Jim Meyering  <jim@meyering.net>
+
+	don't let an invalid time stamp provoke a NULL dereference
+	* lib/log_blackbox.c (qb_log_blackbox_print_from_file): Handle
+	localtime failure by printing the long-int representation rather
+	than a strftime-formatted one.
+
+2011-06-23  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix references to README
+
+	Change README into markdown to look better on github
+
+2011-06-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	Change Lindent options to break the procedure type.
+	so change:
+	int foo(void)
+
+	to
+
+	int
+	foo(void)
+
+	LOOP: make the return more consistent in qb_loop_timer_expire_time_get()
+	If there is any error return 0
+	 (meaning the timer is or has expired)
+
+2011-06-21  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: use uint8_t for pointer manipulation
+	char changes size on different arches.
+
+2011-06-20  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: use the correct pointer type.
+
+	Consistently prepend "qb-" to files in /dev/shm
+	Dietmar: can you confirm this works for you?
+
+2011-06-07  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Update the library version to 0.5.0
+
+2011-06-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	check: Change -s to --no-print-directory
+
+	Re-fix mmap() woes on sparc.
+
+2011-06-03  Angus Salkeld  <asalkeld@redhat.com>
+
+	Revert "Fix ringbuffer creation on sparc"
+	This reverts commit 683296f180fdd7b7834dc1506b7a192ae2684c04.
+
+2011-06-02  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix ringbuffer creation on sparc
+	On the first call to qb_rb_open() we try using a number of
+	page sizes. This because the system might have CONFIG_HUGETLB_PAGE_SIZE
+	defined in their kernel. So even though sysconf() returns 2K or 4K
+	some arch's mmap() require alignment on these boundaries.
+
+	TEST: some improvements to the check script to make it's output better.
+	It quietens the output and this makes it easier to understand the
+	results.
+
+	TEST: Fix ssize_t format compiler warning
+
+	Make building a bit quieter by default.
+
+	Fix "make dist".
+	The deps were not quite right with write_logs.c
+
+	Fix some spelling.
+
+2011-05-31  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: remove failed server tests.
+	They now fail (because of 8880465924ce090365ee6b87c4d0c167c7deeb62).
+
+	We now need a smart way of detecting that a process is the
+	last one attached to the ringbuffer and free it.
+
+	TEST: initialize some globals before the test is run.
+	This is not strictly needed as each test is forked,
+	but is a bit more explicit.
+
+	TEST: fix the server shutdown.
+	The server was getting prematurently killed, and was
+	causing resource leakage. We now give the server a little
+	time to respond to the connection beiong closed.
+
+	TEST: add job_add poll_handler
+
+	TEST: name the ipc connections after the test functions
+
+	IPC: misc cleanup & logging improvements
+
+	IPC: make the setting the flowcontrol atomic
+
+2011-05-30  Виноградов Василий  <wmdlr@yandex.ru>
+
+	RB: More consistent behavior when closing a ringbuffer
+
+2011-05-27  Виноградов Василий  <wmdlr@yandex.ru>
+
+	Provide some helpful macros for iterating over lists.
+
+2011-05-27  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: make the creation of write_logs.c atomic
+
+2011-05-26  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: make sure make-log-test appends a bracket
+
+	Correct the declarations of some inlines
+
+	Add support for ansi inline and typeof
+
+	Remove all the C++ comments
+
+	Add an ansi option into ./check
+	Also included in ./check all
+
+2011-05-24  Jim Meyering  <jim@meyering.net>
+
+	qb_rb_write_to_file clean-up
+	* lib/ringbuffer.c (qb_rb_write_to_file): Remove dead initialization
+	and redundant "result < 0" tests.
+
+	adjust .gitignore so "git status" ignores all build artifacts
+
+	use latest git-version-gen from gnulib
+
+2011-05-23  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add custom targets
+	This is partly to make the tests more robusts and
+	to add some more flexibility to the logging.
+
+2011-05-20  Angus Salkeld  <asalkeld@redhat.com>
+
+	COV 15: fix potential reference after deref
+
+	COV 14: fix potential dereference after free()
+
+	COV 13: cleanup error handling in qb_util_circular_mmap()
+
+	COV 12: prevent unintialized value error in bmcpt
+
+	COV 10: fix mem leaks in qb_rb_create_from_file()
+
+	COV 9: fix mem leak in qb_rb_open error condition
+
+	COV 8: don't leak mem when returning an error.
+
+	COV 7: close file if for some strange reason it exists
+
+	COV 6: check for a failed sysconf() before calling malloc()
+
+	COV 4 & 11: cleanup error handling in handle_new_connection()
+
+	COV 3: remove dead code.
+	qb_rb_close() is called in the signal handler.
+
+	COV 2: fix unreachable code (move call to qb_ipcs_us_withdraw up)
+
+	COV 1: dead code - clean up ifdefs
+
+2011-05-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add a rwlock to protect the lists.
+
+2011-05-18  Angus Salkeld  <asalkeld@redhat.com>
+
+	Update the TODO
+
+	IPC: set the return status before cleaning up.
+
+	Fix the test dependancies (and "make rpm")
+	My first attempt at this broke "make rpm" - oops.
+	It seems that we need a common extension for tests to get the
+	dependancies to work.
+
+	fix the FIXME's Jim pointed out
+
+2011-05-17  Jim Meyering  <meyering@redhat.com>
+
+	avoid autoconf warning
+	Autoconf warned about this:
+	configure.ac:72: warning: AC_LANG_CONFTEST: no AC_LANG_SOURCE\
+	  call detected in body
+	That's warning about the use via AC_COMPILE_IFELSE without
+	specifying a language.  The easiest way to work around that is
+	to avoid the use of CC altogether and instead to use the preprocessor.
+	* configure.ac (cc_supports_flag): Use AC_PREPROC_IFELSE in place
+	of AC_COMPILE_IFELSE (and CPPFLAGS in place of CFLAGS).
+
+2011-05-17  Jim Meyering  <jim@meyering.net>
+
+	add FIXME comments for other NULL-deref-upon-OOM problems
+	* lib/ipc_us.c (handle_new_connection):
+	* lib/loop_job.c (qb_loop_jobs_create):
+	* lib/loop_poll.c (qb_loop_poll_create):
+	* lib/loop_timerlist.c (qb_loop_timer_create):
+	* lib/ringbuffer.c (qb_rb_open):
+	* lib/ipcc.c (qb_ipcc_connect): Likewise.
+
+	avoid NULL dereference after failed malloc
+	* lib/util.c (qb_thread_lock_create): Handle failed malloc.
+	* lib/ipc_posix_mq.c (qb_ipc_pmq_sendv): Likewise.
+	* lib/loop_job.c (qb_loop_job_add): Likewise.
+	* lib/loop.c (qb_loop_create): Likewise.
+
+2011-05-17  Angus Salkeld  <asalkeld@redhat.com>
+
+	make sure check_resources is the last test to run
+	http://www.gnu.org/s/hello/manual/automake/Simple-Tests-using-parallel_002dtests.html
+
+2011-05-17  Jim Meyering  <jim@meyering.net>
+
+	make the tests run in parallel
+	I ran "make check" in libqb and watched impatiently ;-)
+	as the tests ran in serial on my multi-core system.
+	If you add automake's "parallel-tests" option below, they'll
+	run in parallel.
+
+	The color-tests option makes it so the "PASS" and "FAIL" words
+	are colored green and red respectively.  Nice, but no big deal.
+	Similarly nice-to-have is the "dist-xz" option.
+	That makes is so when you run "make dist" it creates xz-compressed
+	tarballs in addition to the usual gzip-compressed ones.
+	The advantage of also using xz is that it compresses significantly better:
+
+	    $ du -sh *z
+	    1.2M    libqb-0.4.1.75-3737-dirty.tar.gz
+	    812K    libqb-0.4.1.75-3737-dirty.tar.xz
+
+	Now, whenever a project releases both gzip-compressed and
+	xz-compressed tarballs, I always download only the latter, smaller ones.
+	Not only does it save time on the download (minimal in this case),
+	but it occupies less space on disk and uncompresses faster.
+
+2011-05-13  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: strip the last "\n" from incomming messages
+
+	LOG: make the "entering" and "leaving" capital
+
+2011-05-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix some compiler warnings
+
+	LOG: add an enter and leave trace function
+
+2011-04-18  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add locking & change dcs list into a singly-linked list.
+
+	TESTS: add a threaded logging test
+
+	LOG: check prioritynames[] bounds
+
+	LOG: created array with wrong size - yikes!
+
+	LOG: include needed stdio.h
+
+	LOG: make all priorities uint8_t
+
+2011-04-15  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix logging to file
+	qb_log_file_open() left the target in an UNUSED state.
+
+	Compile on FreeBSD
+	Also re-run autoscan.
+
+2011-04-14  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add write_logs.c to .gitignore
+
+	LOG: refactor the filter code a bit.
+	Reuse code a bit better.
+
+	Add qbconfig.h to the list of headers to be installed.
+
+	LOG: fix new callsite pointer (not incrementing correctly)
+
+	TEST: make a way of testing both with and without __attribute__((section))
+
+	LOG: fix the building of write_logs.c (for bench-log)
+
+	LOG: fix formatting test (fails in make distcheck)
+	This fails as the BUILDING_IN_PLACE patch was left out.
+	Now re-added, make distcheck passes.
+
+	TESTS: use new logging API
+
+	LOG: add some basic tests & fixes
+
+	LOG: add dynamic callsites (for platforms that don't support __attribute__(section)
+
+	ARRAY: add getter's to retrieve number of bins and elms/bin
+
+2011-04-13  Angus Salkeld  <asalkeld@redhat.com>
+
+	ARRAY: return -ERANGE when index is out of range.
+	So you can differentiate the other errors (-EINVAL)
+
+2011-04-12  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add LOG_TRACE
+
+	LOG: add the ability to adjust the priority sent to syslog()
+	If you have:
+	qb_log_filter_ctl(QB_LOG_SYSLOG, QB_LOG_FILTER_ADD,
+			  QB_LOG_FILTER_FILE, "hack.c", LOG_DEBUG);
+	these logs will not make there way to /var/log/messags
+	without reconfiguring syslog.
+
+	So to help on the fly debugging do the following:
+	qb_log_ctl(QB_LOG_SYSLOG, QB_LOG_CONF_PRIORITY_BUMP,
+		   LOG_INFO - LOG_DEBUG);
+
+	Now all messages that have the QB_LOG_SYSLOG target set
+	will have their priority bumped before going to syslog().
+
+2011-04-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix the copyright in bench-log.c
+
+	LOG: flush output to files
+
+	LOG: change the target type from uint32_t to int32_t.
+	This is so that you won't get warnings from mixing integer types.
+
+	I have updated the input checks in log.c to check for invalid
+	targets.
+
+	LOG: only set state in log.c
+	This requires an enable after qb_log_file_open()
+
+2011-04-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix splint warning
+
+	LOG: teach filter_ctl() to write tags
+
+	LOG: remove the tags arument from qb_log() and add qb_logt() which has the tags argument.
+	I think in most cases tags will not be used and it will
+	just be a pain inserting ", 0". But if someone wants to use
+	tags like this then they still can via qb_logt()
+
+	LOG: change the filter matches to use strstr() for partial match support.
+
+	LOG: fix shared library callsites
+	This finds all the callsites in shared libraries
+	(using dl_iterate_phdr()) at the time qb_log_init()
+	is called.
+
+
+	Conflicts:
+
+		lib/log.c
+
+	LOG: add a callsite_dump() function to see what callsite are avaliable.
+
+	LOG: support dynamically loaded modules
+
+	LOG: make prioritynames[] static
+
+2011-04-04  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add required include to qbloop.h
+
+	Merge branch 'logging'
+
+2011-04-01  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: make the documentation more meaningful
+
+	LOG: general cleanup (indentation, NULL checks, etc...)
+
+	LOG: move formatting code into new file
+
+	Add D_FORTIFY_SOURCE=2 to check script
+
+	LOG: add a qb_log_fini() to cleanup
+	This replaces qb_log_thread_stop() but also release shared mem
+
+2011-03-31  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix mapping from priority to name
+	Remove qb_log_priority_name_get() as we have the
+	formatting.
+
+	LOG: add a new "tags" field
+	this is a tags that is used by the caller to:
+	- define the message as an external message (needs free'ing)
+	- define a feature or susbsytem that can be printed in the log message.
+
+	LOG: change "tags" field to "targets"
+	This is it's new meaning, so makes things clearer
+
+	LOG: keep a list of active targets to speed iteration
+
+	LOG: deal better with timestamps
+	1) use gettimeofday() - suprisingly faster than clock_gettime(MONOTONIC)
+	2) don't format the time until it is needed
+	3) insert time_t into the blackbox (not a formatted string)
+
+	This improves performance and tidies the code up.
+	It also requires less space in the blackbox.
+
+	LOG: add bench-log to .gitignore
+
+2011-03-31  Steven Dake  <sdake@redhat.com>
+
+	Add a benchmark program for the qblog flight recorder
+
+2011-03-31  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: fix minor compile warning
+
+2011-03-30  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add a format option to each target.
+
+	LOG: improve the docs
+
+	LOG: add qb_log_file_close()
+
+	LOG: add the ability to import logs from other sources.
+
+	Be more consistent with the C++ protection
+
+	Ignore 2 splint warnings
+
+	SPEC: make the spec file more like the fedora one.
+
+	LOG: re-work the API to be easier to use.
+
+2011-03-28  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add some content to the README
+
+	LOG: add qb_log_priority_name_get()
+
+	LOG: fix make install and distcheck
+
+	LOG: add a qb_perror() function
+	- Add an internal version too
+	- Update the library code to use it.
+
+2011-03-27  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add a timestamp to the log handler
+	This makes sure that the timestamp is correct at the time
+	the call to qb_log() was called.
+
+	TESTS: remove unused function
+
+	LOG: split the tag function out into tag and untag
+
+	LOG: improve the doxygen overview.
+
+	LOG: fix splint warnings
+
+2011-03-26  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: use the new logging mechanism for internal log messages.
+	This uses the top bit of the "tags" to distinguish
+	the internal messages from extternal ones.
+
+2011-03-25  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOG: add a blackbox
+
+	LOG: add threaded logging (non-blocking)
+
+	LOG: create a common header
+
+	Add logging infrastructure.
+
+2011-01-31  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Set the gpgsignkey in release.mk
+
+	Bump library version to 0.4.1
+
+2011-01-31  Angus Salkeld  <asalkeld@redhat.com>
+
+	BUILD: only set -g and -O options if explicitly requested.
+	 compiler debug & optimization flags are only set with either
+	  --enable-debug or --enable-coverage.
+	 This prevents defaults and environmental flags from
+	 been overridden.
+
+	Move check_all into check and impove it (add rpm checks)
+
+	RPM: make the spec more like a fedora spec file
+	fix tarball url
+	add procps to BuildRequires
+	add a "make check" section
+	change %(buildroot) to $RPM_BUILD_ROOT
+
+2011-01-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: check read() return value
+
+	DOCS: add missing @param on new timeout argument
+
+	Remove unneccessary check for library "dl"
+
+	RPM: add missing build dependancies
+
+	BUILD: improve the rpm building
+	copy corosync's rpm build system.
+
+2011-01-05  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump version to 0.4.0
+
+2011-01-05  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: change timer handle from pointer to index + check.
+	This changes the timer hande from a live pointer to a handle
+	more like hdb handles (minus the ref counting).
+
+	What i like about this is it is not neccessary to clear
+	the applications handle using memset().
+
+	LOOP: remove tlist absolute timer
+
+2010-12-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	TESTS: make sure timers are not leaking file descriptors
+
+	LOOP: make static functions like _<name>_()
+
+	LOOP: reduce the number of for loops
+
+	LOOP: change entry type enum
+	This to avoid QB_POLL been equal to 0, which could
+	hide some bugs.
+
+	LOOP: add per-level todo counters
+
+2010-12-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: use rb refcount to check for "connectiveness"
+	This makes it possible the detect the loss of the server
+	and return -ENOTCONN.
+
+	RB: add a function to get the reference count.
+	Really handy to see if the peer is "connected".
+
+	TEST: add ipc tests for recv's with a timeout
+
+	IPC: add a timeout to the client recv functions
+	Also allow the ringbuffer to pass ETIMEDOUT back to the
+	client applications.
+
+2010-12-14  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: improve shm performance by timing out earlier on poll()
+	My receint change adding in a call to recv_ready(, 10) was
+	really slowing down the shm performance.
+	So now I am rather retrying which doesn't slow it down
+	and also passes "make check".
+
+	IPC: return the correct number of bytes sent
+
+2010-12-13  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: rename _ref_inc() to _ref()
+
+	DOCS: set the version from a configure variable
+
+	LOOP: change timers to be nano second based
+
+	DOCS: fix some doxygen warnings for missing comments.
+
+2010-12-10  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: return EAGAIN from qb_ipcc_recv() if recv_ready() returns 0
+	found with corosync CTS
+
+	IPC: return -ENOTCONN when the other end exits
+
+	TESTS: add a test case for recving from a failed server
+
+	Remove carriage returns in qb_util_log() calls.
+
+	IPC: check for null ringbuffer
+
+	IPC: fix non-blocking event mechanism
+
+	LOOP: remove unneccessary event array
+
+2010-12-03  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPCS: don't block on sending socket notification
+
+	IPC: export qb_ipcs_disconnect()
+
+2010-11-17  Angus Salkeld  <asalkeld@redhat.com>
+
+	fix waring produced by -Wp,-D_FORTIFY_SOURCE=2
+
+2010-11-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix some freeBSD compile warnings.
+
+	LOOP: fix compile warning when we don't have timerfd.
+
+	LOOP: move pipe creation into qb_loop_signals_create()
+	Also make sure the pipe is non blocking.
+
+	RB: fix munmap size (else shared mem not freed correctly)
+
+	Fix some error handling in RB & IPC
+
+2010-11-15  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: remove try again log message
+
+	LOOP: prevent timers from deleting them selves.
+
+2010-11-12  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: add some debug to log slow jobs
+
+	IPC: withdraw server socket when destroying a service.
+
+	TLIST: use qb_util_nano_monotonic_hz() instead of HZ
+	also add a test for under running.
+
+	RB: check for NULL on close
+	this just saves the user from doing this.
+
+	UTIL: check for shm usable space.
+	- port corosync write() check
+
+2010-11-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: add signal support to main loop
+
+2010-11-05  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: prevent high cpu utilization on no load.
+	We we passing "0" timeout into poll().
+
+2010-11-04  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: add connection_closed() callback.
+	- added another callback closed() and use this as the current
+	  destroyed_connection() has been used.
+	- the destroyed() event changes meaning to
+	  "the connection object is about to be free'ed"
+	  and the user can free the context memory.
+
+2010-11-03  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: change service instance from handle to pointer.
+	Mainly to be consistent with the other objects.
+
+	Also:
+	- splint warnings(-weak) are now zero.
+	- Added a reference counter to replace the handle.
+
+	Fix ./check_all
+	- Spelling error in "make distcheck"
+	- add check_resources.sh to EXTRA_DIST
+
+	IPC: add flow control & q_len to unix socket transport.
+	This uses a small (2*int32_t) shared memory segment.
+
+2010-11-02  Angus Salkeld  <asalkeld@redhat.com>
+
+	RB: don't be so timid on shutdown
+
+	TEST: add a check_resources script
+
+2010-11-01  Angus Salkeld  <asalkeld@redhat.com>
+
+	Cleanup config defines & add a check_all script
+	Run:
+	./check_all
+	to build with and without some common configurations.
+
+	UTIL: move mmap helpers into private header
+
+	LOOP: add support for timerfd
+	If available use timerfd_create() as it is
+	much more accurate than tlist.h
+
+2010-10-30  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: remove refcount'ing debug
+
+	TEST: make test ouput more verbose
+
+	LOOP: add qb_loop_destroy()
+
+2010-10-29  Angus Salkeld  <asalkeld@redhat.com>
+
+	LOOP: fix job poll and simplify main loop
+
+2010-10-27  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: add server connection states for better shutdown.
+	This also fixes the refcounting, which was not quite right.
+
+	IPC: add qb_ipcs_response_sendv()
+	iovec friendly response function
+
+	TIME: move tlist_nano_ functions into util
+
+	RB: improve debug message
+
+	IPC: add job_add() API to the poll abstraction.
+
+2010-10-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix or ignore splint errors
+
+	fix some build issues on FreeBSD
+
+2010-10-21  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: add a connection iterator.
+	So we can iterate over all connections on a service.
+
+	IPC: add stats to server end.
+
+2010-10-20  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: add glib mainloop option to bms
+	Note: glib is only linked into the test app, so
+	libqb not dependant on glib. This is just testing
+	integration.
+
+	ATOMIC: fix the memory barrier setup.
+	This was horribly broken.
+
+2010-10-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: remove sprintf where possible
+
+	LINT: get the lint target working.
+
+	TEST: add some more array tests.
+
+2010-10-19  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Bump version to 0.3.0
+
+2010-10-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	Fix the current warnings
+	Add missing qbutil.h
+
+	HDB: remove locks and use atomic.
+
+	HDB: use qb_array.
+
+	DOCS: add some doxygen comments to array & hdb.
+
+	RB: fix the sem init logic (always use some semaphore).
+
+	RB: use the semaphore to return chunks_used.
+
+	RB: remove locking from ringbuffer.
+	make ref_count atomic
+
+	RB: prevent fd's from been leaked
+
+	IPC/RB: name the ringbuffer's files better.
+
+	IPC: get bmcpt working
+
+	LOOP: use qbarray for poll_entries.
+	This fixes an issue where removing or adding entries
+	can cause a realloc() to move the entries and then a
+	qb_list_del() causes a SIGSEGV (next pointer is now
+	invalid).
+
+	qbarray does not use realloc() so does not suffer from this.
+
+	Add a resizable array that doesn't move memory.
+
+	ATOMIC: fix make distcheck
+
+	LIST/LOOP: allow empty list items but don't splice an empty head.
+
+2010-10-18  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: use atomic for ref counting.
+
+	Add atomic operations.
+	This was initially copied from glib. How ever I have
+	simplified it to only support proper atomic operations
+	with gcc builtin __sync calls. The backup is pthread_spin_lock().
+	I have also obviously namespaced the code to qb_.
+
+2010-10-18  The Quarterback Library Release Team  <quarterback-devel@fedorahosted.org>
+
+	Tweek the release.mk file to produce tags like vX.Y.Z
+
+	Bump version to 0.2.0
+
+2010-10-17  Angus Salkeld  <asalkeld@redhat.com>
+
+	DOCS: do some work on the doxygen output.
+
+	IPC: add support for unix sockets
+
+2010-10-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	TEST: add support events into bm[cs]
+
+	LOOP: remove warning.
+
+	LIST: fix logic in qb_list_splice()
+	this fixes "make check"
+
+2010-10-15  Steven Dake  <sdake@redhat.com>
+
+	get_more_jobs: use qb_list_splice instead of iterating list and readding
+	oprofile picked up get_more_jobs as a heavy abuser of cpu cycles when running
+	with cpgbench.  Typical cpgbench runs this function 37 million times.  This
+	small optimization improves performance of corosync as well as reduces
+	cpu utilization used by this function.
+
+	Might look at tracking length of wait_head and job_head to avoid use of
+	qb_list_length as well (which also iterates).
+
+	qb_list_splice: don't splice an empty list
+	An empty list passed to splice will damage the target splice list.  This patch
+	prevents that from happening by checking for an empty list and not merging
+	in that case.
+
+2010-10-14  Angus Salkeld  <asalkeld@redhat.com>
+
+	configure: re-add check for pthread_spin_lock
+
+	IPC: remove flow control API and move functionality into send()
+	There is no point in a separate API.
+
+2010-10-13  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: add q_len_get() to posix_mq & sysv_mq
+
+	IPC: move destroy() into ipcs.c (all were duplicated)
+
+	IPC: add qb_ipcc_sendv_recv() convenience function.
+
+	TEST: make the bmc messages like cpgbench
+
+2010-10-12  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: recv the messages available (not just one)
+
+	fix some valgrind warnings
+
+	RB: return EAGAIN not ENOMEM if no space on the rb.
+
+	IPC: add support for flowcontrol & rate limiting
+
+	RB: add support for shared user data.
+	(I need this for flow control)
+
+	IPC: cleanup some formatting.
+
+	IPC: improve send/recv error handling
+
+	IPC: accelerate process when rate_limit == FAST.
+
+	IPC: get the poll independent functions working.
+
+	IPC: make msg_process return type int
+
+	IPC: add peek & reclaim
+
+	Remove timer.c (rather use mainloop)
+
+	LOOP: add epoll support
+
+	Add a priority based main loop.
+	This is to try and get a better balance in the amount
+	of processing between IPC and totem in corosync.
+
+	IPC: remove qb_ipcc_event_release()
+
+	LIST: add some more convenience macros.
+
+2010-10-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	RB: cleanup return codes frpm rb_peek()
+
+	IPC: make events always use socket notification
+
+	IPC: use poll() to prevent a recv() blocking
+
+	IPC: teach event_recv() to take a timeout
+
+	UTIL: add qb_timespec_add_ms()
+	add X milli seconds to a timespec.
+	add time defines to qbdefs.h
+
+	IPC: improve resource cleanup/shutdown
+
+	IPC: make internal message ids negative.
+
+	IPC: add a user context_get/set() functions.
+
+	IPC: add sendv() functions to handle iovecs.
+
+	IPC: make sure FD_CLOEXEC is set on all sockets
+
+	TEST: disable posix mq test for now.
+
+	SPEC: Fix the rpm spec file
+
+	DOCS: quiten the doxygen make process
+
+2010-10-04  Angus Salkeld  <asalkeld@redhat.com>
+
+	add qbdefs.h with some common defines.
+
+2010-10-02  Angus Salkeld  <asalkeld@redhat.com>
+
+	POLL: add missing fuction.
+
+	IPC: add a service_id and merge qb_ipcs_create() + qb_ipcs_service_handlers_set()
+
+2010-10-01  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: change the ipcs_connection to a pointer (not handle).
+	This is make integrating with corosync easier.
+	Also technically it doesn't really matter it still
+	has a reference counter.
+
+	IPC: make authenticate callback more generic "accept".
+	This is so that it is more obvious that you can use
+	it for authentication, service availabilty and
+	process resource constraints.
+
+	LIST: add required header
+
+	POLL: gracefully handle running out of file descriptors.
+
+	POLL: Allow modifying POLLIN/POLLOUT state in another thread.
+	while the main thread is blocked in poll system call.
+
+	(ported from corosync)
+
+	Author: Steven Dake <sdake@redhat.com>
+
+2010-09-30  Angus Salkeld  <asalkeld@redhat.com>
+
+	cleanup the configure script.
+	Remove (now) unused checks.
+
+	TEST: fix ipc test after receint API changes.
+
+	Delete unchecked API (to be re-added later).
+
+	IPC: new auth improvement and limits work around.
+	Create the queues/ringbuffers on the server so we don't
+	have to modify proc entries. Then chown them so that
+	the clients can access them.
+
+	RB: add qb_rb_chown()
+	change the ownership of the two mmap'ed files.
+
+2010-09-29  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC_SYSV: get sysv ipc to work with non-root processes.
+
+	TEST: add IPC_TYPE cli option to bms
+
+	TEST: make bmc's output comma delimited
+
+	IPC: pack sysv messages into multiple queue items
+
+	IPC: add events back (were dispatch messages in corosync)
+
+	IPC: rename dispatch queues to event queues.
+
+	IPC: rename qb_ipcs_connection_pt -> qb_ipcs_connection_handle_t
+
+	IPC: un-const the data pointer in recv()
+
+	POLL: check for stop_requested before poll() as well.
+
+2010-09-07  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: get shm & pmq working
+	Note: pmq needs "sudo make check"
+
+	IPC: add a basic tx/rx test case.
+	- cleanup some printf's
+
+2010-09-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: linux & bsd mq_open returns a poll'able file descriptor.
+
+	Lindent most c files again.
+
+	IPC: fix crash on failed auth
+
+	Define new return status policy
+	Good >= 0 (0 = good, or positive value)
+	Bad < 0 (-errno)
+
+2010-09-03  Angus Salkeld  <asalkeld@redhat.com>
+
+	BSD: port new changes to BSD
+	- check for doxygen
+	- no RLIMIT_MSGQUEUE on bsd
+	- change ENODATA to ENOMSG
+
+2010-08-23  Angus Salkeld  <asalkeld@redhat.com>
+
+	IPC: rewrite (simpler API & more structured layout).
+	- implement using posix message queues
+	- implement using sys-v message queues
+	- implement shared memory ringbuffers
+	- add auth via unix sockets
+	- add items to the TODO
+
+	This is still a bit rough, more work to follow...
+
+2010-08-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	automake: check for more headers
+
+2010-08-09  Angus Salkeld  <asalkeld@redhat.com>
+
+	RB: add function qb_rb_chunks_used()
+	This is to make it easier to to see if there is
+	a chunk available to be read.
+
+2010-07-28  Angus Salkeld  <asalkeld@redhat.com>
+
+	RB: make the timedwait() functions more consistent
+
+	POLL: add a job API to process non-fd items.
+
+2010-07-12  quarterback  <quarterback@troll.bigpond>
+
+	Add a release makefile
+	Originally from here:
+	http://git.fedorahosted.org/git/?p=cluster.git;a=blob_plain;f=make/release.mk;hb=refs/heads/STABLE3
+
+	Author: Fabio M. Di Nitto
+
+2010-07-06  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add the coding style definition file.
+
+2010-06-22  Angus Salkeld  <asalkeld@redhat.com>
+
+	int -> int32_t
+
+	unsigned int -> uint32_t
+	some to int32_t (bugs)
+
+	unsigned long long -> uint64_t
+
+	change name of ringbuffer.h to ringbuffer_int.h
+
+2010-06-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	list: rename QB_DECLARE_LIST_INIT -> QB_LIST_DECLARE
+
+	hdb: move functions into cfile
+	convert int -> int32_t
+	rename qb_hdb_handle_t -> qb_handle_t
+	rename DECLARE_HDB_DATABASE -> QB_HDB_DECLARE
+	rename qb_hdb_handle_database -> qb_hdb
+
+2010-06-15  Angus Salkeld  <asalkeld@redhat.com>
+
+	ipc: convert int -> int32_t; unsigned int -> uint32_t
+
+	ipc: use a ringbuffer for requests.
+
+	ipcc: remove unneccessry goto
+
+	rb: fix handling of EINTR from sem_wait
+
+	rb: make rb_chunk_peek() wait on the sem like chunk_read()
+
+	rb: fix bit flag numbering
+
+2010-06-12  Angus Salkeld  <asalkeld@redhat.com>
+
+	bm test programs: allow no args
+
+	rb: add a get name function
+
+	list: add some more doxygen comments
+
+	rb: add an example to the doxygen description.
+
+	rb: rename qb_rb_chunk_writable* -> qb_rb_chunk_
+
+	check_hash: test for dict/words before running.
+
+2010-06-11  Angus Salkeld  <asalkeld@redhat.com>
+
+	rb: cleanup of names and log messages
+
+	util: move some handy macros into qbuil.h
+
+	rb: organise the locks/sems a bit better
+
+	Bring some changes across from corosync.
+	My coverity fixes and honzas fixes.
+
+	Remove unneccessary extern's.
+	http://gcc.gnu.org/ml/gcc/2009-04/msg00812.html
+	http://publications.gbdirect.co.uk/c_book/chapter4/linkage.html
+	http://www.eskimo.com/~scs/cclass/notes/sx5b.html
+
+	note in ipcs.c qb_ipcs_ipc_init() is extern'ed, I don't
+	think that this is needed - we'll soon see :)
+
+2010-06-10  Angus Salkeld  <asalkeld@redhat.com>
+
+	Format all files with Lindent
+
+	Add a script for indenting the code (kernel formatting)
+
+	Add a ringbuffer based off the one in logsys.
+	This ringbuffer is usable across processes.
+	the point is to use this for IPC to provide async
+	connections from client to server, but with inherient
+	flow control.
+
+	This still needs a bit of clean up, but committing now
+	for feedback and as it is quite functional.
+
+2010-05-31  Angus Salkeld  <asalkeld@redhat.com>
+
+	man: document qblist.h better.
+
+	Fix the installation of libqb.pc
+
+	Comment out the plugin tests as they break "make rpm"
+	I can't figure out a "nice" way of doing this.
+
+2010-05-27  Angus Salkeld  <asalkeld@redhat.com>
+
+	Roll all little libs into libqb.
+	This really makes things simpler (to produce and use).
+
+2010-05-26  Angus Salkeld  <asalkeld@redhat.com>
+
+	Make docs rules more maintainable
+
+	Add pkg-config files.
+
+	Fix the new inter-library dependancy.
+	http://old.nabble.com/relinking-error-td27796838.html
+
+2010-05-25  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add __cplusplus externs
+
+	Fix make doxygen (for html output)
+
+	Fix manpage generation when builddir != srcdir
+
+	use new interanl logging functions
+
+	Add a library logging function.
+
+	Add a util library with locking wrappers.
+
+	Re-license to LGPL 2.1
+
+2010-04-29  Angus Salkeld  <asalkeld@redhat.com>
+
+	fix "make distcheck"
+	I am sure that I am going to learn one day :(
+
+	Add tezt programs to .gitignore
+
+	ipc: add non-blocking options to the bmc & bms apps
+	so to test blocking IPC
+	bmc
+	bms
+	to test non-blocking IPC
+	bmc -n
+	bms -n
+
+
+	Conflicts:
+
+		tests/bmc.c
+
+	ipc: add a non-blocking send function.
+
+	ipc: add Steve's benchmark test programs
+
+	ipc: add common types to qbipc_common.h
+
+	ipc: remove uneccessary version compatibilty
+
+2010-04-16  Angus Salkeld  <asalkeld@redhat.com>
+
+	check_plugin: Add -rdynamic to check program
+
+	check_hash: fix test must be run in one test case.
+
+	hash: improve the error handling in key_set()
+
+2010-04-15  Angus Salkeld  <asalkeld@redhat.com>
+
+	libtool and code re-structure
+
+	add a unit test for hash & cleanup.
+	    Fix make distcheck
+	    Add qbhash.h to the makefiles
+	    Fix make rpm.
+	    Make sure the makefiles are generatd for hash
+
+2010-04-15  Steven Dake  <sdake@redhat.com>
+
+	Add an initial implementation of a hash table.
+	The hash table implementation is somewhat unique in that I plan to add graph
+	functionality to allow hash entries to be linked between other hash
+	entries to provide a mechanism to structure data within a hash table.
+
+2010-03-20  Angus Salkeld  <asalkeld@redhat.com>
+
+	add logsys from corosync.
+
+	Add wthread & queue.
+
+2010-03-19  Angus Salkeld  <asalkeld@redhat.com>
+
+	add ipcs from corosync
+
+	clean up lib.versions files
+
+	Add ipcc from corosync
+
+	tweek the .gitignore
+
+	add the plugin library.
+
+	tsafe: replace _XOPEN_SOURCE with HAVE_(function)
+
+	remove ipc so from makefiles
+
+	Added qb_ prefix onto public functions/types.
+
+	Add timer.
+
+	Add spec file
+
+2010-03-11  Angus Salkeld  <asalkeld@redhat.com>
+
+	Add poll, list & tlist
+
+	Add handle database.
+
+	Initial Commit.
+	-autotools build system
+	-tsafe
