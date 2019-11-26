@@ -1,0 +1,12 @@
+libqb (0.11.1-2) unstable; urgency=low
+
+  * Added doxygen to Build-Depends to make sure documentation is
+    built properly 
+
+ -- Martin Loschwitz <madkiss@debian.org>  Tue, 03 Apr 2012 06:47:36 +0000
+
+libqb (0.11.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #666504)  
+
+ -- Martin Loschwitz <madkiss@debian.org>  Sun, 01 Apr 2012 16:47:49 +0000
